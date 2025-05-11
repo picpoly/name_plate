@@ -191,9 +191,41 @@ export default function ProductPage() {
     const totalCount = count + decorationCount
 
     if (isFanStyle) {
+      // 推し活風の場合の料金表に基づいた計算
       if (totalCount <= 3) return basePrice
-      return basePrice + (totalCount - 3) * 120
+
+      // 4文字以上の場合、指定された料金表に従う
+      const fanPrices = [
+        1300,
+        1300,
+        1300, // 1-3文字
+        1420,
+        1540,
+        1660,
+        1780,
+        1900,
+        2020,
+        2140, // 4-10文字
+        2260,
+        2380,
+        2500,
+        2620,
+        2740,
+        2860,
+        2980,
+        3100,
+        3220,
+        3340, // 11-20文字
+      ]
+
+      // 文字数が20を超える場合は、20文字の料金に120円×超過文字数を加算
+      if (totalCount <= 20) {
+        return fanPrices[totalCount - 1]
+      } else {
+        return fanPrices[19] + (totalCount - 20) * 120
+      }
     } else {
+      // 横書き・縦書きの場合は現在の計算方法を維持
       if (totalCount <= 4) return basePrice
       return basePrice + (totalCount - 4) * 120
     }
