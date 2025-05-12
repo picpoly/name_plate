@@ -7,6 +7,7 @@ import { ShoppingCart, ArrowLeft, Truck, CreditCard } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { useToast } from "@/hooks/use-toast"
+import { getStripe } from "@/lib/stripe"
 
 export default function CartPage() {
   const { items, getCartTotal } = useCart()
@@ -54,13 +55,6 @@ export default function CartPage() {
     try {
       setIsLoading(true)
 
-      // v0プレビュー環境での問題を回避するための直接リダイレクト
-      // 注意: これはテスト用の簡易的な実装です
-      window.location.href = "https://checkout.stripe.com/c/pay/cs_test_a1EXAMPLE"
-      return
-
-      // 以下は本来のコード（現在はコメントアウト）
-      /*
       // チェックアウトセッションを作成するAPIを呼び出す
       const response = await fetch("/api/checkout", {
         method: "POST",
@@ -69,8 +63,13 @@ export default function CartPage() {
         },
         body: JSON.stringify({
           items: items,
+          customerEmail: "", // 必要に応じてユーザーのメールアドレスを追加
         }),
       })
+
+      if (!response.ok) {
+        throw new Error("決済処理中にエラーが発生しました")
+      }
 
       const { sessionId, url, error } = await response.json()
 
@@ -89,9 +88,17 @@ export default function CartPage() {
       } else {
         // Stripe.js を使用してチェックアウトを開始
         const stripe = await getStripe()
-        await stripe?.redirectToCheckout({ sessionId })
+        const { error: stripeError } = await stripe?.redirectToCheckout({ sessionId })
+
+        if (stripeError) {
+          console.error("Stripeエラー:", stripeError)
+          toast({
+            title: "エラー",
+            description: stripeError.message || "決済処理中にエラーが発生しました",
+            variant: "destructive",
+          })
+        }
       }
-      */
     } catch (error) {
       console.error("決済処理中にエラーが発生しました:", error)
       toast({
