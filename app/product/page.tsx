@@ -88,7 +88,7 @@ export default function ProductPage() {
   const attachments = [
     { id: "silver", name: "シルバー", image: "/attachment-silver.png" },
     { id: "pink-gold", name: "ピンクゴールド", image: "/attachment-pink-gold.png" },
-    { id: "gold", name: "ゴ���ルド", image: "/attachment-gold.png" },
+    { id: "gold", name: "ゴールド", image: "/attachment-gold.png" },
   ]
 
   // カラーの配列（質感別）
@@ -984,4 +984,3 @@ export default function ProductPage() {
     </div>
   )
 }
-
