@@ -14,8 +14,9 @@ export async function GET(request: Request) {
   }
 
   try {
+    // セッション情報を詳細に取得（商品情報も含む）
     const session = await stripe.checkout.sessions.retrieve(sessionId, {
-      expand: ["line_items", "customer", "payment_intent", "shipping"],
+      expand: ["line_items.data", "customer", "payment_intent", "shipping"],
     })
 
     return NextResponse.json({ session })
