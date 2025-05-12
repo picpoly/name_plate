@@ -83,14 +83,13 @@ export async function POST(request: Request) {
     console.log("Success URL:", successUrl)
     console.log("Cancel URL:", cancelUrl)
 
-    // チェックアウトセッションの作成
-    const session = await stripe.checkout.sessions.create({
+    // セッション作成のパラメータを準備
+    const sessionParams: Stripe.Checkout.SessionCreateParams = {
       payment_method_types: ["card"],
       line_items: lineItems,
       mode: "payment",
       success_url: successUrl,
       cancel_url: cancelUrl,
-      customer_email: customerEmail,
       shipping_address_collection: {
         allowed_countries: ["JP"],
       },
@@ -116,13 +115,27 @@ export async function POST(request: Request) {
           },
         },
       ],
-    })
+    }
+
+    // メールアドレスが有効な場合のみcustomer_emailを追加
+    if (customerEmail && isValidEmail(customerEmail)) {
+      sessionParams.customer_email = customerEmail
+    }
+
+    // チェックアウトセッションの作成
+    const session = await stripe.checkout.sessions.create(sessionParams)
 
     return NextResponse.json({ sessionId: session.id, url: session.url })
   } catch (error) {
     console.error("Stripe checkout error:", error)
     return NextResponse.json({ error: "決済処理中にエラーが発生しました" }, { status: 500 })
   }
+}
+
+// メールアドレスの検証関数
+function isValidEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return emailRegex.test(email)
 }
 
 // 商品の説明文を生成するヘルパー関数
