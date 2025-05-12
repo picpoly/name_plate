@@ -18,6 +18,8 @@ export type CartItem = {
     textColor: string
     textColorName: string
     text: string
+    baseTexture: string // 追加
+    textTexture: string // 追加
     suffix?: string
     texture: string
   }

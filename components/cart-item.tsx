@@ -90,21 +90,19 @@ export function CartItemComponent({ item }: CartItemProps) {
             </p>
             <p>
               <span className="font-medium">ベースカラー:</span> {item.customizations.baseColorName}（
-              {item.customizations.texture === "normal"
+              {item.customizations.baseTexture === "normal"
                 ? "ノーマル"
-                : item.customizations.texture === "matte"
+                : item.customizations.baseTexture === "matte"
                   ? "マット"
                   : "シルク"}
-              ）
             </p>
             <p>
               <span className="font-medium">テキストカラー:</span> {item.customizations.textColorName}（
-              {item.customizations.texture === "normal"
+              {item.customizations.textTexture === "normal"
                 ? "ノーマル"
-                : item.customizations.texture === "matte"
+                : item.customizations.textTexture === "matte"
                   ? "マット"
                   : "シルク"}
-              ）
             </p>
             <p>
               <span className="font-medium">入力文字:</span> {item.customizations.text}
