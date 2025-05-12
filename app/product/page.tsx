@@ -865,7 +865,7 @@ export default function ProductPage() {
                 <h3 className="font-medium">テキストカラー</h3>
                 <InfoPopover name="textColor" title="テキストカラー">
                   <p>文字の色を選択</p>
-                  <p>選択した質感によって利用できる色が変わります</p>
+                  <p>選択した質感によって利��できる色が変わります</p>
                   <p>ベースカラーとのコントラストを考慮して選択してください</p>
                 </InfoPopover>
               </div>
