@@ -458,6 +458,11 @@ export default function ProductPage() {
     setPrice(calculatePrice(charCount, template, selectedDecoration))
   }, [])
 
+  useEffect(() => {
+    // 現在のURLをローカルストレージに保存
+    localStorage.setItem("lastViewedProduct", window.location.pathname + window.location.search)
+  }, [])
+
   const isAddToCartDisabled = () => {
     // 推し活風が選択されていて、装飾文字が「なし」の場合は無効
     return template === "fan" && selectedDecoration === "none"
@@ -979,3 +984,4 @@ export default function ProductPage() {
     </div>
   )
 }
+
