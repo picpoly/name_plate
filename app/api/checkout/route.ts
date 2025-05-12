@@ -3,16 +3,37 @@ import Stripe from "stripe"
 import type { CartItem } from "@/context/cart-context"
 
 // Stripeインスタンスの初期化
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2023-10-16", // 最新のAPIバージョンを使用
-})
+const getStripeInstance = () => {
+  const secretKey = process.env.STRIPE_SECRET_KEY
+
+  if (!secretKey) {
+    throw new Error("STRIPE_SECRET_KEY environment variable is not set")
+  }
+
+  return new Stripe(secretKey, {
+    apiVersion: "2023-10-16", // 最新のAPIバージョンを使用
+  })
+}
 
 export async function POST(request: Request) {
   try {
+    // リクエストボディの解析
     const { items, customerEmail } = await request.json()
 
     if (!items || items.length === 0) {
       return NextResponse.json({ error: "カート内に商品がありません" }, { status: 400 })
+    }
+
+    // Stripeインスタンスの取得
+    let stripe: Stripe
+    try {
+      stripe = getStripeInstance()
+    } catch (error) {
+      console.error("Stripe initialization error:", error)
+      return NextResponse.json(
+        { error: "決済サービスの初期化に失敗しました。管理者にお問い合わせください。" },
+        { status: 500 },
+      )
     }
 
     // originの取得とフォールバックURLの設定
