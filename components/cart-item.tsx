@@ -89,10 +89,22 @@ export function CartItemComponent({ item }: CartItemProps) {
                   : "明朝体"}
             </p>
             <p>
-              <span className="font-medium">ベースカラー:</span> {item.customizations.baseColorName}
+              <span className="font-medium">ベースカラー:</span> {item.customizations.baseColorName}（
+              {item.customizations.texture === "normal"
+                ? "ノーマル"
+                : item.customizations.texture === "matte"
+                  ? "マット"
+                  : "シルク"}
+              ）
             </p>
             <p>
-              <span className="font-medium">テキストカラー:</span> {item.customizations.textColorName}
+              <span className="font-medium">テキストカラー:</span> {item.customizations.textColorName}（
+              {item.customizations.texture === "normal"
+                ? "ノーマル"
+                : item.customizations.texture === "matte"
+                  ? "マット"
+                  : "シルク"}
+              ）
             </p>
             <p>
               <span className="font-medium">入力文字:</span> {item.customizations.text}
