@@ -35,14 +35,14 @@ export default function ProductPage() {
   const svgContainerRef = useRef(null)
   const [decorationError, setDecorationError] = useState(false)
   // 現在表示中のメイン画像を管理するステート
-  const [currentMainImage, setCurrentMainImage] = useState("/custom-nameplate-1.jpeg")
+  const [currentMainImage, setCurrentMainImage] = useState("/custom-nameplate-new-1.png")
   // カートに追加した後のフィードバックを表示するステート
   const [addedToCart, setAddedToCart] = useState(false)
 
   // 商品画像の配列
   const productImages = [
-    { src: "/custom-nameplate-1.jpeg", alt: "ネームプレートキーホルダー例 1" },
-    { src: "/custom-nameplate-2.jpeg", alt: "ネームプレートキーホルダー例 2" },
+    { src: "/custom-nameplate-new-1.png", alt: "ネームプレートキーホルダー例 1" },
+    { src: "/custom-nameplate-new-2.png", alt: "ネームプレートキーホルダー例 2" },
     { src: "/custom-nameplate-3.jpeg", alt: "ネームプレートキーホルダー例 3" },
     { src: "/custom-nameplate-4.jpeg", alt: "ネームプレートキーホルダー例 4" },
   ]
@@ -88,7 +88,7 @@ export default function ProductPage() {
   const attachments = [
     { id: "silver", name: "シルバー", image: "/attachment-silver.png" },
     { id: "pink-gold", name: "ピンクゴールド", image: "/attachment-pink-gold.png" },
-    { id: "gold", name: "ゴールド", image: "/attachment-gold.png" },
+    { id: "gold", name: "ゴ���ルド", image: "/attachment-gold.png" },
   ]
 
   // カラーの配列（質感別）
@@ -984,3 +984,4 @@ export default function ProductPage() {
     </div>
   )
 }
+
