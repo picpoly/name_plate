@@ -5,7 +5,6 @@ import { CartItemComponent } from "@/components/cart-item"
 import { Button } from "@/components/ui/button"
 import { ShoppingCart, ArrowLeft, Truck, CreditCard } from "lucide-react"
 import Link from "next/link"
-import Image from "next/image"
 import { useEffect, useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 
@@ -172,18 +171,10 @@ export default function CartPage() {
                 <span className="text-sm text-gray-600">4〜7営業日で発送</span>
               </div>
             </div>
-
-            <div className="mt-6 pt-4 border-t">
-              <div className="flex justify-center space-x-2">
-                <Image src="/visa-application-process.png" alt="Visa" width={40} height={24} />
-                <Image src="/mastercard-logo-abstract.png" alt="Mastercard" width={40} height={24} />
-                <Image src="/abstract-credit-card-design.png" alt="American Express" width={40} height={24} />
-                <Image src="/yellow-construction-vehicle.png" alt="JCB" width={40} height={24} />
-              </div>
-            </div>
           </div>
         </div>
       </div>
     </div>
   )
 }
+
