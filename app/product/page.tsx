@@ -5,7 +5,7 @@ import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import { ShoppingCart, Heart, Share2, Info, Slash, X, Check } from "lucide-react"
+import { ShoppingCart, Heart, Share2, Info, Slash, X, Check, ExternalLink } from "lucide-react"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
@@ -19,11 +19,13 @@ import { v4 as uuidv4 } from "uuid"
 export default function ProductPage() {
   const router = useRouter()
   const { addItem } = useCart()
+  const materialTabRef = useRef(null)
 
   const [template, setTemplate] = useState("horizontal")
   const [charCount, setCharCount] = useState(1)
   const [price, setPrice] = useState(1300)
-  const [selectedTexture, setSelectedTexture] = useState("normal") // "normal", "matte", "silk"
+  const [baseTexture, setBaseTexture] = useState("normal") // "normal", "matte", "silk"
+  const [textTexture, setTextTexture] = useState("normal") // "normal", "matte", "silk"
   const [baseColor, setBaseColor] = useState("#FFFFFF") // デフォルトは白
   const [baseColorName, setBaseColorName] = useState("ジェイドホワイト")
   const [textColor, setTextColor] = useState("#000000") // デフォルトは黒
@@ -38,6 +40,8 @@ export default function ProductPage() {
   const [currentMainImage, setCurrentMainImage] = useState("/custom-nameplate-new-1.png")
   // カートに追加した後のフィードバックを表示するステート
   const [addedToCart, setAddedToCart] = useState(false)
+  // 現在選択されているタブ
+  const [activeTab, setActiveTab] = useState("price")
 
   // 商品画像の配列
   const productImages = [
@@ -67,6 +71,17 @@ export default function ProductPage() {
       ...openPopovers,
       [name]: !openPopovers[name],
     })
+  }
+
+  // 質感タブに移動する関数
+  const scrollToMaterialTab = () => {
+    setActiveTab("material")
+    setTimeout(() => {
+      window.scrollTo({
+        top: document.getElementById("product-tabs").offsetTop - 100,
+        behavior: "smooth",
+      })
+    }, 100)
   }
 
   // 装飾文字の配列
@@ -177,8 +192,12 @@ export default function ProductPage() {
   ]
 
   // 現在表示すべき色の配列を取得
-  const getDisplayColors = () => {
-    return colorsByTexture[selectedTexture] || []
+  const getBaseColors = () => {
+    return colorsByTexture[baseTexture] || []
+  }
+
+  const getTextColors = () => {
+    return colorsByTexture[textTexture] || []
   }
 
   // 文字数に基づいて価格を計算する関数
@@ -257,9 +276,12 @@ export default function ProductPage() {
     setPrice(calculatePrice(charCount, value, selectedDecoration))
   }
 
-  // 質感選択時の処理
-  const handleTextureChange = (value) => {
-    setSelectedTexture(value)
+  const handleBaseTextureChange = (value) => {
+    setBaseTexture(value)
+  }
+
+  const handleTextTextureChange = (value) => {
+    setTextTexture(value)
   }
 
   // ベースカラー選択時の処理
@@ -485,7 +507,8 @@ export default function ProductPage() {
         textColor,
         textColorName,
         text: inputText || "名前",
-        texture: selectedTexture,
+        baseTexture, // 追加
+        textTexture, // 追加
         ...(template === "fan" && { suffix }),
       },
     }
@@ -727,22 +750,35 @@ export default function ProductPage() {
               </div>
             </div>
 
-            {/* カラー選択 - 質感 */}
+            {/* ベースカラー質感 */}
             <div>
               <div className="flex items-center mb-2">
-                <h3 className="font-medium">カラー質感</h3>
-                <InfoPopover name="texture" title="カラー質感">
+                <h3 className="font-medium">ベースカラー質感</h3>
+                <InfoPopover name="baseTexture" title="ベースカラー質感">
                   <p>ノーマル：標準的な光沢のある仕上がり</p>
                   <p>マット：落ち着いた質感の艶消し仕上げ</p>
                   <p>シルク：上品な光沢感のある特殊仕上げ</p>
                 </InfoPopover>
+                <Button
+                  variant="link"
+                  size="sm"
+                  className="ml-2 text-blue-500 flex items-center"
+                  onClick={scrollToMaterialTab}
+                >
+                  <span className="text-xs">質感について</span>
+                  <ExternalLink className="h-3 w-3 ml-1" />
+                </Button>
               </div>
-              <RadioGroup defaultValue="normal" className="grid grid-cols-3 gap-2" onValueChange={handleTextureChange}>
+              <RadioGroup
+                defaultValue="normal"
+                className="grid grid-cols-3 gap-2"
+                onValueChange={handleBaseTextureChange}
+              >
                 {textureCategories.map((texture) => (
                   <div key={texture.id}>
-                    <RadioGroupItem value={texture.id} id={`texture-${texture.id}`} className="peer sr-only" />
+                    <RadioGroupItem value={texture.id} id={`base-texture-${texture.id}`} className="peer sr-only" />
                     <Label
-                      htmlFor={`texture-${texture.id}`}
+                      htmlFor={`base-texture-${texture.id}`}
                       className="flex items-center justify-center rounded-md border-2 border-muted bg-popover p-2 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
                     >
                       {texture.name}
@@ -752,7 +788,7 @@ export default function ProductPage() {
               </RadioGroup>
             </div>
 
-            {/* カラー選択 - ベースカラー */}
+            {/* ベースカラー */}
             <div>
               <div className="flex items-center mb-2">
                 <h3 className="font-medium">ベースカラー</h3>
@@ -763,7 +799,7 @@ export default function ProductPage() {
                 </InfoPopover>
               </div>
               <div className="grid grid-cols-6 gap-2 max-h-40 overflow-y-auto">
-                {getDisplayColors().map((color, i) => (
+                {getBaseColors().map((color, i) => (
                   <div key={`base-${i}`} className="relative">
                     <input
                       type="radio"
@@ -785,7 +821,45 @@ export default function ProductPage() {
               </div>
             </div>
 
-            {/* カラー選択 - テキストカラー */}
+            {/* テキストカラー質感 */}
+            <div>
+              <div className="flex items-center mb-2">
+                <h3 className="font-medium">テキストカラー質感</h3>
+                <InfoPopover name="textTexture" title="テキストカラー質感">
+                  <p>ノーマル：標準的な光沢のある仕上がり</p>
+                  <p>マット：落ち着いた質感の艶消し仕上げ</p>
+                  <p>シルク：上品な光沢感のある特殊仕上げ</p>
+                </InfoPopover>
+                <Button
+                  variant="link"
+                  size="sm"
+                  className="ml-2 text-blue-500 flex items-center"
+                  onClick={scrollToMaterialTab}
+                >
+                  <span className="text-xs">質感について</span>
+                  <ExternalLink className="h-3 w-3 ml-1" />
+                </Button>
+              </div>
+              <RadioGroup
+                defaultValue="normal"
+                className="grid grid-cols-3 gap-2"
+                onValueChange={handleTextTextureChange}
+              >
+                {textureCategories.map((texture) => (
+                  <div key={texture.id}>
+                    <RadioGroupItem value={texture.id} id={`text-texture-${texture.id}`} className="peer sr-only" />
+                    <Label
+                      htmlFor={`text-texture-${texture.id}`}
+                      className="flex items-center justify-center rounded-md border-2 border-muted bg-popover p-2 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
+                    >
+                      {texture.name}
+                    </Label>
+                  </div>
+                ))}
+              </RadioGroup>
+            </div>
+
+            {/* テキストカラー */}
             <div>
               <div className="flex items-center mb-2">
                 <h3 className="font-medium">テキストカラー</h3>
@@ -796,7 +870,7 @@ export default function ProductPage() {
                 </InfoPopover>
               </div>
               <div className="grid grid-cols-6 gap-2 max-h-40 overflow-y-auto">
-                {getDisplayColors().map((color, i) => (
+                {getTextColors().map((color, i) => (
                   <div key={`text-${i}`} className="relative">
                     <input
                       type="radio"
@@ -930,7 +1004,7 @@ export default function ProductPage() {
             </div>
           </div>
 
-          <Tabs defaultValue="price">
+          <Tabs id="product-tabs" defaultValue="price" value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="price">料金表</TabsTrigger>
               <TabsTrigger value="material">素材・質感</TabsTrigger>
@@ -1071,3 +1145,4 @@ export default function ProductPage() {
     </div>
   )
 }
+
