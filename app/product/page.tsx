@@ -931,8 +931,10 @@ export default function ProductPage() {
           </div>
 
           <Tabs defaultValue="price">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="price">料金表</TabsTrigger>
+              <TabsTrigger value="material">素材・質感</TabsTrigger>
+              <TabsTrigger value="specs">商品仕様</TabsTrigger>
               <TabsTrigger value="details">詳細</TabsTrigger>
               <TabsTrigger value="shipping">配送情報</TabsTrigger>
             </TabsList>
@@ -960,7 +962,6 @@ export default function ProductPage() {
             </TabsContent>
             <TabsContent value="details" className="pt-4">
               <ul className="list-disc pl-5 space-y-2 text-sm">
-                <li>高品質アクリル素材使用</li>
                 <li>カスタマイズ可能なテキスト（1〜20文字）</li>
                 <li>3種類のテンプレートから選択可能</li>
                 <li>3種類のフォントスタイル</li>
@@ -973,10 +974,96 @@ export default function ProductPage() {
             <TabsContent value="shipping" className="pt-4">
               <div className="space-y-2 text-sm">
                 <p>送料：全国一律185円（税込）</p>
-                <p>通常配送: 3-5営業日以内に発送</p>
+                <p>通常配送: 4-7営業日以内に発送</p>
                 <p>速達配送: 1-2営業日以内に発送（追加料金あり）</p>
                 <p>※この商品は注文個数で金額変動しません</p>
               </div>
+            </TabsContent>
+            <TabsContent value="material" className="pt-4">
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-medium mb-2">素材について</h3>
+                  <p className="text-sm mb-2">素材はPLA（植物由来のプラスチック）で人にも地球にも優しい素材です。</p>
+                  <p className="text-sm">軽量かつ丈夫で、長くお使いいただけます。</p>
+                </div>
+
+                <div>
+                  <h3 className="font-medium mb-2">質感の種類</h3>
+
+                  <div className="mb-4">
+                    <h4 className="text-sm font-medium mb-1">ノーマル</h4>
+                    <p className="text-sm mb-2">
+                      標準的な光沢のある仕上がりです。発色が良く、鮮やかな色合いが特徴です。
+                    </p>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="aspect-video relative rounded overflow-hidden">
+                        <Image src="/texture-normal-1.png" alt="ノーマル質感 赤" fill className="object-cover" />
+                      </div>
+                      <div className="aspect-video relative rounded overflow-hidden">
+                        <Image src="/texture-normal-2.png" alt="ノーマル質感 白" fill className="object-cover" />
+                      </div>
+                      <div className="aspect-video relative rounded overflow-hidden">
+                        <Image src="/texture-normal-3.png" alt="ノーマル質感 黒" fill className="object-cover" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mb-4">
+                    <h4 className="text-sm font-medium mb-1">マット</h4>
+                    <p className="text-sm mb-2">
+                      落ち着いた質感の艶消し仕上げです。光の反射が少なく、上品な印象を与えます。
+                    </p>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="aspect-video relative rounded overflow-hidden">
+                        <Image src="/texture-matte-1.png" alt="マット質感 赤" fill className="object-cover" />
+                      </div>
+                      <div className="aspect-video relative rounded overflow-hidden">
+                        <Image src="/texture-matte-2.png" alt="マット質感 白" fill className="object-cover" />
+                      </div>
+                      <div className="aspect-video relative rounded overflow-hidden">
+                        <Image src="/texture-matte-3.png" alt="マット質感 黒" fill className="object-cover" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="text-sm font-medium mb-1">シルク（光沢）</h4>
+                    <p className="text-sm mb-2">
+                      上品な光沢感のある特殊仕上げです。高級感があり、特別な印象を与えます。
+                    </p>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="aspect-video relative rounded overflow-hidden">
+                        <Image src="/texture-silk-1.png" alt="シルク質感 赤" fill className="object-cover" />
+                      </div>
+                      <div className="aspect-video relative rounded overflow-hidden">
+                        <Image src="/texture-silk-2.png" alt="シルク質感 白" fill className="object-cover" />
+                      </div>
+                      <div className="aspect-video relative rounded overflow-hidden">
+                        <Image src="/texture-silk-3.png" alt="シルク質感 グレー" fill className="object-cover" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="specs" className="pt-4">
+              <Table>
+                <TableBody>
+                  <TableRow>
+                    <TableCell className="font-medium">素材</TableCell>
+                    <TableCell>PLA（植物由来のプラスチック）</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">サイズ</TableCell>
+                    <TableCell>縦幅 約20mm　横幅 文字数によって変動　厚み 約3mm</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">包装</TableCell>
+                    <TableCell>OPP袋個包装</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
             </TabsContent>
           </Tabs>
         </div>
@@ -984,3 +1071,4 @@ export default function ProductPage() {
     </div>
   )
 }
+
