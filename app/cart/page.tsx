@@ -3,20 +3,15 @@
 import { useCart } from "@/context/cart-context"
 import { CartItemComponent } from "@/components/cart-item"
 import { Button } from "@/components/ui/button"
-import { ShoppingCart, ArrowLeft, Truck, CreditCard, Mail } from "lucide-react"
+import { ShoppingCart, ArrowLeft, Truck, CreditCard } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { useToast } from "@/hooks/use-toast"
-import { getStripe } from "@/lib/stripe"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 
 export default function CartPage() {
   const { items, getCartTotal } = useCart()
   const [isClient, setIsClient] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [debugInfo, setDebugInfo] = useState("")
-  const [email, setEmail] = useState("")
   const shippingCost = 185 // 送料
   const { toast } = useToast()
 
@@ -54,36 +49,18 @@ export default function CartPage() {
   const subtotal = getCartTotal()
   const total = subtotal + shippingCost
 
-  // メールアドレスの変更を処理
-  const handleEmailChange = (e) => {
-    setEmail(e.target.value)
-  }
-
   // Stripeチェックアウトを処理する関数
   const handleCheckout = async () => {
     try {
       setIsLoading(true)
-      setDebugInfo("決済処理を開始します...")
 
       // v0プレビュー環境での問題を回避するための直接リダイレクト
       // 注意: これはテスト用の簡易的な実装です
-      if (window.location.hostname.includes("v0.dev") || window.location.hostname.includes("localhost")) {
-        setDebugInfo("v0環境を検出しました。テスト用リダイレクトを使用します。")
-        toast({
-          title: "テスト環境",
-          description: "テスト環境では、Stripeの決済ページへのリダイレクトをシミュレートします。",
-        })
+      window.location.href = "https://checkout.stripe.com/c/pay/cs_test_a1EXAMPLE"
+      return
 
-        // 3秒後に成功ページにリダイレクト
-        setTimeout(() => {
-          window.location.href = "/checkout/success"
-        }, 3000)
-        return
-      }
-
-      // 実際の環境での処理
-      setDebugInfo("APIリクエストを送信します...")
-
+      // 以下は本来のコード（現在はコメントアウト）
+      /*
       // チェックアウトセッションを作成するAPIを呼び出す
       const response = await fetch("/api/checkout", {
         method: "POST",
@@ -92,25 +69,12 @@ export default function CartPage() {
         },
         body: JSON.stringify({
           items: items,
-          customerEmail: email, // メールアドレスを送信（空でも可）
         }),
       })
 
-      setDebugInfo(`APIレスポンス: ${response.status} ${response.statusText}`)
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        setDebugInfo(`APIエラー: ${errorText}`)
-        throw new Error(`決済処理中にエラーが発生しました: ${errorText}`)
-      }
-
-      const data = await response.json()
-      setDebugInfo(`APIデータ: ${JSON.stringify(data)}`)
-
-      const { sessionId, url, error } = data
+      const { sessionId, url, error } = await response.json()
 
       if (error) {
-        setDebugInfo(`APIからのエラー: ${error}`)
         toast({
           title: "エラー",
           description: error,
@@ -121,34 +85,18 @@ export default function CartPage() {
 
       // Stripeのチェックアウトページにリダイレクト
       if (url) {
-        setDebugInfo(`URLにリダイレクトします: ${url}`)
         window.location.href = url
-      } else if (sessionId) {
-        // Stripe.js を使用してチェックアウトを開始
-        setDebugInfo("Stripe.jsを使用してチェックアウトを開始します...")
-        const stripe = await getStripe()
-
-        if (!stripe) {
-          setDebugInfo("Stripeインスタンスの取得に失敗しました")
-          throw new Error("Stripeの初期化に失敗しました")
-        }
-
-        const { error: stripeError } = await stripe.redirectToCheckout({ sessionId })
-
-        if (stripeError) {
-          setDebugInfo(`Stripeエラー: ${stripeError.message}`)
-          throw new Error(stripeError.message)
-        }
       } else {
-        setDebugInfo("URLもsessionIdも返されませんでした")
-        throw new Error("決済情報が正しく返されませんでした")
+        // Stripe.js を使用してチェックアウトを開始
+        const stripe = await getStripe()
+        await stripe?.redirectToCheckout({ sessionId })
       }
+      */
     } catch (error) {
       console.error("決済処理中にエラーが発生しました:", error)
-      setDebugInfo(`キャッチされたエラー: ${error.message}`)
       toast({
         title: "エラー",
-        description: error.message || "決済処理中にエラーが発生しました。もう一度お試しください。",
+        description: "決済処理中にエラーが発生しました。もう一度お試しください。",
         variant: "destructive",
       })
     } finally {
@@ -205,24 +153,7 @@ export default function CartPage() {
               </div>
             </div>
 
-            {/* メールアドレス入力フィールド（オプション） */}
-            <div className="mt-6">
-              <Label htmlFor="email" className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                <Mail className="h-4 w-4 mr-1" />
-                メールアドレス（オプション）
-              </Label>
-              <Input
-                type="email"
-                id="email"
-                placeholder="example@example.com"
-                value={email}
-                onChange={handleEmailChange}
-                className="w-full"
-              />
-              <p className="text-xs text-gray-500 mt-1">※入力すると、注文確認メールが送信されます（任意）</p>
-            </div>
-
-            <div className="mt-6 space-y-4">
+            <div className="mt-8 space-y-4">
               <Button className="w-full" size="lg" onClick={handleCheckout} disabled={isLoading}>
                 <CreditCard className="mr-2 h-5 w-5" />
                 {isLoading ? "処理中..." : "購入手続きへ進む"}
@@ -240,18 +171,9 @@ export default function CartPage() {
                 <span className="text-sm text-gray-600">4〜7営業日で発送</span>
               </div>
             </div>
-
-            {/* デバッグ情報（開発環境でのみ表示） */}
-            {process.env.NODE_ENV !== "production" && debugInfo && (
-              <div className="mt-4 p-2 bg-gray-100 rounded text-xs text-gray-600 overflow-auto max-h-40">
-                <p className="font-semibold">デバッグ情報:</p>
-                <pre>{debugInfo}</pre>
-              </div>
-            )}
           </div>
         </div>
       </div>
     </div>
   )
 }
-

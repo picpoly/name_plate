@@ -3,37 +3,16 @@ import Stripe from "stripe"
 import type { CartItem } from "@/context/cart-context"
 
 // Stripeインスタンスの初期化
-const getStripeInstance = () => {
-  const secretKey = process.env.STRIPE_SECRET_KEY
-
-  if (!secretKey) {
-    throw new Error("STRIPE_SECRET_KEY environment variable is not set")
-  }
-
-  return new Stripe(secretKey, {
-    apiVersion: "2023-10-16", // 最新のAPIバージョンを使用
-  })
-}
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: "2023-10-16", // 最新のAPIバージョンを使用
+})
 
 export async function POST(request: Request) {
   try {
-    // リクエストボディの解析
     const { items, customerEmail } = await request.json()
 
     if (!items || items.length === 0) {
       return NextResponse.json({ error: "カート内に商品がありません" }, { status: 400 })
-    }
-
-    // Stripeインスタンスの取得
-    let stripe: Stripe
-    try {
-      stripe = getStripeInstance()
-    } catch (error) {
-      console.error("Stripe initialization error:", error)
-      return NextResponse.json(
-        { error: "決済サービスの初期化に失敗しました。管理者にお問い合わせください。" },
-        { status: 500 },
-      )
     }
 
     // originの取得とフォールバックURLの設定
@@ -83,13 +62,14 @@ export async function POST(request: Request) {
     console.log("Success URL:", successUrl)
     console.log("Cancel URL:", cancelUrl)
 
-    // セッション作成のパラメータを準備
-    const sessionParams: Stripe.Checkout.SessionCreateParams = {
+    // チェックアウトセッションの作成
+    const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: lineItems,
       mode: "payment",
       success_url: successUrl,
       cancel_url: cancelUrl,
+      customer_email: customerEmail,
       shipping_address_collection: {
         allowed_countries: ["JP"],
       },
@@ -115,27 +95,13 @@ export async function POST(request: Request) {
           },
         },
       ],
-    }
-
-    // メールアドレスが有効な場合のみcustomer_emailを追加
-    if (customerEmail && isValidEmail(customerEmail)) {
-      sessionParams.customer_email = customerEmail
-    }
-
-    // チェックアウトセッションの作成
-    const session = await stripe.checkout.sessions.create(sessionParams)
+    })
 
     return NextResponse.json({ sessionId: session.id, url: session.url })
   } catch (error) {
     console.error("Stripe checkout error:", error)
     return NextResponse.json({ error: "決済処理中にエラーが発生しました" }, { status: 500 })
   }
-}
-
-// メールアドレスの検証関数
-function isValidEmail(email: string): boolean {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  return emailRegex.test(email)
 }
 
 // 商品の説明文を生成するヘルパー関数
