@@ -1,47 +1,113 @@
 "use client"
 
-import { useCart } from "@/context/cart-context"
-import { CartItemComponent } from "@/components/cart-item"
-import { Button } from "@/components/ui/button"
-import { ShoppingCart, ArrowLeft, Truck, CreditCard } from "lucide-react"
+import { useState } from "react"
+import Image from "next/image"
 import Link from "next/link"
-import { useEffect, useState } from "react"
-import { useToast } from "@/hooks/use-toast"
-import { getStripe } from "@/lib/stripe"
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
+import { useRouter } from "next/navigation"
+import { useCart } from "@/context/cart-context"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Separator } from "@/components/ui/separator"
+import { ShoppingCart, Trash2, ArrowLeft, CreditCard, AlertCircle } from "lucide-react"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 export default function CartPage() {
-  const { items, getCartTotal } = useCart()
-  const [isClient, setIsClient] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [debugInfo, setDebugInfo] = useState("")
-  const shippingCost = 185 // 送料
-  const { toast } = useToast()
+  const { items, removeItem, updateQuantity, totalItems, totalPrice } = useCart()
+  const router = useRouter()
+  const [isCheckingOut, setIsCheckingOut] = useState(false)
 
-  // クライアントサイドでのみレンダリングするための対策
-  useEffect(() => {
-    setIsClient(true)
-  }, [])
+  // 商品の数量を変更する関数
+  const handleQuantityChange = (id: string, newQuantity: number) => {
+    if (newQuantity < 1) newQuantity = 1
+    if (newQuantity > 10) newQuantity = 10
+    updateQuantity(id, newQuantity)
+  }
 
-  if (!isClient) {
-    return null // サーバーサイドレンダリング時は何も表示しない
+  // チェックアウトに進む関数
+  const handleCheckout = () => {
+    setIsCheckingOut(true)
+    // 実際のチェックアウトページに遷移する前に少し待機（UX向上のため）
+    setTimeout(() => {
+      router.push("/checkout")
+    }, 500)
+  }
+
+  // テンプレート名を日本語に変換する関数
+  const getTemplateName = (template: string) => {
+    switch (template) {
+      case "horizontal":
+        return "横書き"
+      case "vertical":
+        return "縦書き"
+      case "fan":
+        return "推し活風"
+      default:
+        return template
+    }
+  }
+
+  // フォント名を日本語に変換する関数
+  const getFontName = (font: string) => {
+    switch (font) {
+      case "overlapping":
+        return "かさなり文字"
+      case "pop":
+        return "ポップ"
+      case "mincho":
+        return "明朝体"
+      default:
+        return font
+    }
+  }
+
+  // 質感名を日本語に変換する関数
+  const getTextureName = (texture: string) => {
+    switch (texture) {
+      case "normal":
+        return "ノーマル"
+      case "matte":
+        return "マット"
+      case "silk":
+        return "シルク"
+      default:
+        return texture
+    }
+  }
+
+  // 接尾辞を日本語に変換する関数
+  const getSuffixName = (suffix: string) => {
+    switch (suffix) {
+      case "chan":
+        return "ちゃん"
+      case "kun":
+        return "くん"
+      case "sama":
+        return "さま"
+      case "san":
+        return "さん"
+      case "oshi":
+        return "推し"
+      default:
+        return suffix
+    }
   }
 
   // カートが空の場合
   if (items.length === 0) {
     return (
-      <div className="container mx-auto px-4 py-12 bg-white">
-        <div className="flex flex-col items-center justify-center text-center py-12">
-          <div className="mb-6">
-            <ShoppingCart className="h-24 w-24 text-gray-300" />
+      <div className="container mx-auto px-4 py-12 max-w-4xl">
+        <h1 className="text-2xl font-bold mb-8">ショッピングカート</h1>
+        <div className="bg-white rounded-lg shadow-sm p-8 text-center">
+          <div className="flex justify-center mb-4">
+            <ShoppingCart className="h-16 w-16 text-gray-300" />
           </div>
-          <h1 className="text-2xl font-bold mb-4 text-gray-800">カートは空です</h1>
-          <p className="text-gray-600 mb-8">カートに商品がありません。商品を追加してください。</p>
+          <h2 className="text-xl font-semibold mb-2">カートは空です</h2>
+          <p className="text-gray-500 mb-6">商品をカートに追加してください</p>
           <Link href="/product">
-            <Button size="lg">
+            <Button>
               <ArrowLeft className="mr-2 h-4 w-4" />
-              商品一覧に戻る
+              商品ページに戻る
             </Button>
           </Link>
         </div>
@@ -49,195 +115,166 @@ export default function CartPage() {
     )
   }
 
-  // 合計金額の計算
-  const subtotal = getCartTotal()
-  const total = subtotal + shippingCost
-
-  // Stripeチェックアウトを処理する関数
-  const handleCheckout = async () => {
-    try {
-      setIsLoading(true)
-      setDebugInfo("決済処理を開始します...")
-
-      // v0プレビュー環境での問題を回避するための直接リダイレクト
-      // 注意: これはテスト用の簡易的な実装です
-      if (window.location.hostname.includes("v0.dev") || window.location.hostname.includes("localhost")) {
-        setDebugInfo("v0環境を検出しました。テスト用リダイレクトを使用します。")
-        toast({
-          title: "テスト環境",
-          description: "テスト環境では、Stripeの決済ページへのリダイレクトをシミュレートします。",
-        })
-
-        // 3秒後に成功ページにリダイレクト
-        setTimeout(() => {
-          window.location.href = "/checkout/success"
-        }, 3000)
-        return
-      }
-
-      // 実際の環境での処理
-      setDebugInfo("APIリクエストを送信します...")
-
-      // チェックアウトセッションを作成するAPIを呼び出す
-      const response = await fetch("/api/checkout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          items: items,
-          customerEmail: "", // 必要に応じてユーザーのメールアドレスを追加
-        }),
-      })
-
-      setDebugInfo(`APIレスポンス: ${response.status} ${response.statusText}`)
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        setDebugInfo(`APIエラー: ${errorText}`)
-        throw new Error(`決済処理中にエラーが発生しました: ${errorText}`)
-      }
-
-      const data = await response.json()
-      setDebugInfo(`APIデータ: ${JSON.stringify(data)}`)
-
-      const { sessionId, url, error } = data
-
-      if (error) {
-        setDebugInfo(`APIからのエラー: ${error}`)
-        toast({
-          title: "エラー",
-          description: error,
-          variant: "destructive",
-        })
-        return
-      }
-
-      // Stripeのチェックアウトページにリダイレクト
-      if (url) {
-        setDebugInfo(`URLにリダイレクトします: ${url}`)
-        window.location.href = url
-      } else if (sessionId) {
-        // Stripe.js を使用してチェックアウトを開始
-        setDebugInfo("Stripe.jsを使用してチェックアウトを開始します...")
-        const stripe = await getStripe()
-
-        if (!stripe) {
-          setDebugInfo("Stripeインスタンスの取得に失敗しました")
-          throw new Error("Stripeの初期化に失敗しました")
-        }
-
-        const { error: stripeError } = await stripe.redirectToCheckout({ sessionId })
-
-        if (stripeError) {
-          setDebugInfo(`Stripeエラー: ${stripeError.message}`)
-          throw new Error(stripeError.message)
-        }
-      } else {
-        setDebugInfo("URLもsessionIdも返されませんでした")
-        throw new Error("決済情報が正しく返されませんでした")
-      }
-    } catch (error) {
-      console.error("決済処理中にエラーが発生しました:", error)
-      setDebugInfo(`キャッチされたエラー: ${error.message}`)
-      toast({
-        title: "エラー",
-        description: error.message || "決済処理中にエラーが発生しました。もう一度お試しください。",
-        variant: "destructive",
-      })
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
+    <div className="container mx-auto px-4 py-12 max-w-4xl">
+      <h1 className="text-2xl font-bold mb-8">ショッピングカート</h1>
 
-      <div className="container mx-auto px-4 py-8 bg-white flex-grow">
-        <h1 className="text-3xl font-bold mb-8 text-gray-800">ショッピングカート</h1>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* カート商品リスト */}
+        <div className="md:col-span-2">
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <h2 className="text-lg font-semibold mb-4">カート内の商品 ({totalItems}点)</h2>
 
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* カート商品リスト */}
-          <div className="w-full lg:w-2/3">
-            <div className="bg-white rounded-lg shadow-sm border p-6">
-              <h2 className="text-xl font-semibold mb-6 text-gray-800">カート内の商品</h2>
+            {items.map((item) => (
+              <div key={item.id} className="mb-6 last:mb-0">
+                <div className="flex flex-col sm:flex-row gap-4">
+                  {/* 商品画像 */}
+                  <div className="relative w-full sm:w-32 h-32 rounded-md overflow-hidden bg-gray-100">
+                    <Image src={item.image || "/placeholder.svg"} alt={item.name} fill className="object-contain" />
+                  </div>
 
-              <div className="divide-y">
-                {items.map((item) => (
-                  <CartItemComponent key={item.id} item={item} />
-                ))}
+                  {/* 商品情報 */}
+                  <div className="flex-1">
+                    <div className="flex justify-between">
+                      <h3 className="font-medium">{item.name}</h3>
+                      <p className="font-semibold">¥{item.price.toLocaleString()}</p>
+                    </div>
+
+                    {/* カスタマイズ情報のアコーディオン */}
+                    {item.customizations && (
+                      <Accordion type="single" collapsible className="mt-2">
+                        <AccordionItem value="customizations">
+                          <AccordionTrigger className="text-sm py-2">カスタマイズ詳細</AccordionTrigger>
+                          <AccordionContent>
+                            <ul className="text-sm space-y-1 text-gray-600">
+                              <li>
+                                <span className="font-medium">テンプレート:</span>{" "}
+                                {getTemplateName(item.customizations.template)}
+                              </li>
+                              <li>
+                                <span className="font-medium">フォント:</span> {getFontName(item.customizations.font)}
+                              </li>
+                              <li>
+                                <span className="font-medium">装飾文字:</span>{" "}
+                                {item.customizations.decoration === "none" ? "なし" : item.customizations.decoration}
+                              </li>
+                              <li>
+                                <span className="font-medium">ベースカラー:</span> {item.customizations.baseColorName} (
+                                {getTextureName(item.customizations.baseTexture)})
+                              </li>
+                              <li>
+                                <span className="font-medium">テキストカラー:</span> {item.customizations.textColorName}{" "}
+                                ({getTextureName(item.customizations.textTexture)})
+                              </li>
+                              <li>
+                                <span className="font-medium">入力文字:</span> {item.customizations.text}
+                              </li>
+                              {item.customizations.template === "fan" && item.customizations.suffix && (
+                                <li>
+                                  <span className="font-medium">接尾辞:</span>{" "}
+                                  {getSuffixName(item.customizations.suffix)}
+                                </li>
+                              )}
+                            </ul>
+                          </AccordionContent>
+                        </AccordionItem>
+                      </Accordion>
+                    )}
+
+                    {/* 数量変更と削除 */}
+                    <div className="flex items-center justify-between mt-4">
+                      <div className="flex items-center">
+                        <span className="text-sm mr-2">数量:</span>
+                        <div className="flex items-center">
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-8 w-8 rounded-r-none"
+                            onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                          >
+                            -
+                          </Button>
+                          <Input
+                            type="number"
+                            min="1"
+                            max="10"
+                            value={item.quantity}
+                            onChange={(e) => handleQuantityChange(item.id, Number.parseInt(e.target.value) || 1)}
+                            className="h-8 w-12 rounded-none text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          />
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-8 w-8 rounded-l-none"
+                            onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                          >
+                            +
+                          </Button>
+                        </div>
+                      </div>
+                      <Button variant="ghost" size="sm" onClick={() => removeItem(item.id)}>
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        <span>削除</span>
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+                <Separator className="mt-6" />
               </div>
+            ))}
+          </div>
+        </div>
 
-              <div className="mt-6 pt-4 border-t">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    const lastUrl = localStorage.getItem("lastViewedProduct") || "/product"
-                    window.location.href = lastUrl
-                  }}
-                >
+        {/* 注文サマリー */}
+        <div className="md:col-span-1">
+          <div className="bg-white rounded-lg shadow-sm p-6 sticky top-4">
+            <h2 className="text-lg font-semibold mb-4">注文サマリー</h2>
+
+            <div className="space-y-2 mb-4">
+              <div className="flex justify-between">
+                <span>小計</span>
+                <span>¥{totalPrice.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>送料</span>
+                <span>¥185</span>
+              </div>
+              <Separator className="my-2" />
+              <div className="flex justify-between font-bold">
+                <span>合計</span>
+                <span>¥{(totalPrice + 185).toLocaleString()}</span>
+              </div>
+              <div className="text-xs text-gray-500 text-right">（税込）</div>
+            </div>
+
+            <Alert className="mb-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>お届け日数</AlertTitle>
+              <AlertDescription>ご注文確定後、4〜7営業日以内に発送いたします。</AlertDescription>
+            </Alert>
+
+            <Button className="w-full" size="lg" onClick={handleCheckout} disabled={isCheckingOut}>
+              {isCheckingOut ? (
+                "処理中..."
+              ) : (
+                <>
+                  <CreditCard className="mr-2 h-5 w-5" />
+                  注文手続きへ進む
+                </>
+              )}
+            </Button>
+
+            <div className="mt-4">
+              <Link href="/product">
+                <Button variant="link" className="text-sm w-full">
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   買い物を続ける
                 </Button>
-              </div>
-            </div>
-          </div>
-
-          {/* 注文サマリー */}
-          <div className="w-full lg:w-1/3">
-            <div className="bg-white rounded-lg shadow-sm border p-6 sticky top-4">
-              <h2 className="text-xl font-semibold mb-6 text-gray-800">注文内容</h2>
-
-              <div className="space-y-4">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">小計</span>
-                  <span className="text-gray-800">¥{subtotal.toLocaleString()}</span>
-                </div>
-
-                <div className="flex justify-between">
-                  <span className="text-gray-600">送料</span>
-                  <span className="text-gray-800">¥{shippingCost.toLocaleString()}</span>
-                </div>
-
-                <div className="pt-4 border-t flex justify-between font-bold">
-                  <span className="text-gray-800">合計</span>
-                  <span className="text-gray-800">¥{total.toLocaleString()}</span>
-                </div>
-              </div>
-
-              <div className="mt-8 space-y-4">
-                <Button className="w-full" size="lg" onClick={handleCheckout} disabled={isLoading}>
-                  <CreditCard className="mr-2 h-5 w-5" />
-                  {isLoading ? "処理中..." : "購入手続きへ進む"}
-                </Button>
-
-                <div className="text-xs text-gray-600 text-center">
-                  <p>※クレジットカード決済に対応しています</p>
-                  <p>※Stripeの安全な決済ページに移動します</p>
-                </div>
-              </div>
-
-              <div className="mt-6 pt-4 border-t">
-                <div className="flex items-center justify-center space-x-2">
-                  <Truck className="h-4 w-4 text-gray-600" />
-                  <span className="text-sm text-gray-600">4〜7営業日で発送</span>
-                </div>
-              </div>
-
-              {/* デバッグ情報（開発環境でのみ表示） */}
-              {process.env.NODE_ENV !== "production" && debugInfo && (
-                <div className="mt-4 p-2 bg-gray-100 rounded text-xs text-gray-600 overflow-auto max-h-40">
-                  <p className="font-semibold">デバッグ情報:</p>
-                  <pre>{debugInfo}</pre>
-                </div>
-              )}
+              </Link>
             </div>
           </div>
         </div>
       </div>
-
-      <Footer />
     </div>
   )
 }

@@ -1,48 +1,61 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { CheckCircle, ShoppingBag } from "lucide-react"
+import { useEffect } from "react"
+import Link from "next/link"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useCart } from "@/context/cart-context"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Check, ShoppingBag } from "lucide-react"
 
-export default function CheckoutSuccessPage() {
+export default function SuccessPage() {
+  const searchParams = useSearchParams()
   const router = useRouter()
   const { clearCart } = useCart()
-  const [lastProductUrl, setLastProductUrl] = useState("/product")
+  const sessionId = searchParams.get("session_id")
 
   useEffect(() => {
-    // 決済成功時にカートをクリア
+    // セッションIDがない場合はカートページにリダイレクト
+    if (!sessionId) {
+      router.push("/cart")
+      return
+    }
+
+    // カートをクリア
     clearCart()
 
-    // 最後に閲覧した商品ページのURLを取得
-    const savedUrl = localStorage.getItem("lastViewedProduct")
-    if (savedUrl) {
-      setLastProductUrl(savedUrl)
-    }
-  }, [clearCart])
+    // 注文情報の取得などの処理をここに追加できます
+    // 実際のアプリケーションでは、セッションIDを使用してバックエンドから注文情報を取得します
+  }, [sessionId, clearCart, router])
 
-  // 買い物を続けるボタンのクリックハンドラ
-  const handleContinueShopping = () => {
-    router.push(lastProductUrl)
+  // セッションIDがない場合はローディング表示
+  if (!sessionId) {
+    return <div className="container mx-auto px-4 py-12 text-center">読み込み中...</div>
   }
 
   return (
-    <div className="container mx-auto px-4 py-12 bg-white">
-      <div className="max-w-2xl mx-auto">
-        <div className="flex justify-center mb-6">
-          <CheckCircle className="h-24 w-24 text-green-500" />
-        </div>
-
-        <h1 className="text-3xl font-bold mb-8 text-center text-gray-800">ご注文ありがとうございました！</h1>
-
-        <div className="flex justify-center">
-          <Button size="lg" onClick={handleContinueShopping}>
-            <ShoppingBag className="mr-2 h-5 w-5" />
-            お買い物を続ける
-          </Button>
-        </div>
-      </div>
+    <div className="container mx-auto px-4 py-12 max-w-4xl">
+      <Card className="mx-auto max-w-md">
+        <CardHeader className="text-center">
+          <div className="mx-auto bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mb-4">
+            <Check className="h-8 w-8 text-green-600" />
+          </div>
+          <CardTitle className="text-2xl">ご注文ありがとうございます！</CardTitle>
+          <CardDescription>注文番号: {sessionId.substring(0, 8)}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p>ご注文内容の確認メールをお送りしました。メールが届かない場合は、お問い合わせください。</p>
+          <p>商品は4〜7営業日以内に発送いたします。</p>
+        </CardContent>
+        <CardFooter className="flex justify-center">
+          <Link href="/">
+            <Button>
+              <ShoppingBag className="mr-2 h-4 w-4" />
+              ショップに戻る
+            </Button>
+          </Link>
+        </CardFooter>
+      </Card>
     </div>
   )
 }
