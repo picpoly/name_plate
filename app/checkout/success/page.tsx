@@ -1,18 +1,20 @@
 "use client"
 
 import { useEffect } from "react"
-import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useCart } from "@/context/cart-context"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Check, ShoppingBag } from "lucide-react"
+import { Check, ExternalLink } from "lucide-react"
 
 export default function SuccessPage() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const { clearCart } = useCart()
   const sessionId = searchParams.get("session_id")
+
+  // LINE友達追加ページのURL
+  const lineUrl = "https://xanlic6j.autosns.app/line"
 
   useEffect(() => {
     // セッションIDがない場合はカートページにリダイレクト
@@ -47,13 +49,16 @@ export default function SuccessPage() {
           <p>ご注文内容の確認メールをお送りしました。メールが届かない場合は、お問い合わせください。</p>
           <p>商品は4〜7営業日以内に発送いたします。</p>
         </CardContent>
-        <CardFooter className="flex justify-center">
-          <Link href="/">
-            <Button>
-              <ShoppingBag className="mr-2 h-4 w-4" />
-              ショップに戻る
+        <CardFooter className="flex flex-col gap-4">
+          <a href={lineUrl} className="w-full">
+            <Button className="w-full">
+              <ExternalLink className="mr-2 h-4 w-4" />
+              LINE公式アカウントを友達追加
             </Button>
-          </Link>
+          </a>
+          <p className="text-sm text-center text-gray-500">
+            LINE公式アカウントでは、お得な情報や新商品のお知らせをお届けします。
+          </p>
         </CardFooter>
       </Card>
     </div>

@@ -7,8 +7,8 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2023-10-16",
 })
 
-// 関数のシグネチャを更新して、配送情報を受け取るようにする
-export async function createCheckoutSession(items: CartItem[], customerData: any) {
+// 元の関数シグネチャに戻しつつ、メールアドレスを受け取るようにする
+export async function createCheckoutSession(items: CartItem[], customerEmail: string) {
   try {
     // 商品ラインアイテムを作成
     const lineItems = items.map((item) => {
@@ -53,7 +53,7 @@ export async function createCheckoutSession(items: CartItem[], customerData: any
       mode: "payment",
       success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/cart`,
-      customer_email: customerData.email,
+      customer_email: customerEmail,
       shipping_address_collection: {
         allowed_countries: ["JP"],
       },
@@ -89,16 +89,6 @@ export async function createCheckoutSession(items: CartItem[], customerData: any
             customizations: item.customizations,
           })),
         ),
-        customer_name: `${customerData.lastName} ${customerData.firstName}`,
-        shipping_address: JSON.stringify({
-          postal_code: customerData.postalCode,
-          prefecture: customerData.prefecture,
-          city: customerData.city,
-          address1: customerData.address1,
-          address2: customerData.address2 || "",
-        }),
-        phone: customerData.phone,
-        notes: customerData.notes || "",
       },
     })
 
