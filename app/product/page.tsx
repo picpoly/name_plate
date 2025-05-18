@@ -3,18 +3,18 @@
 import Image from "next/image"
 import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import { ShoppingCart, Heart, Share2, Info, Slash, X, Check, ExternalLink } from "lucide-react"
+import { ShoppingCart, Heart, Share2, Info, Slash, X, Check } from "lucide-react"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useRouter } from "next/navigation"
 import { useCart, type CartItem } from "@/context/cart-context"
 import { v4 as uuidv4 } from "uuid"
+import { Header } from "@/components/header"
 
 export default function ProductPage() {
   const router = useRouter()
@@ -42,6 +42,8 @@ export default function ProductPage() {
   const [addedToCart, setAddedToCart] = useState(false)
   // 現在選択されているタブ
   const [activeTab, setActiveTab] = useState("price")
+  // 現在のステップを管理するステート
+  const [currentStep, setCurrentStep] = useState(1)
 
   // 商品画像の配列
   const productImages = [
@@ -485,6 +487,11 @@ export default function ProductPage() {
     localStorage.setItem("lastViewedProduct", window.location.pathname + window.location.search)
   }, [])
 
+  // ページ読み込み時に一番上にスクロール
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
+
   const isAddToCartDisabled = () => {
     // 推し活風が選択されていて、装飾文字が「なし」の場合は無効
     return template === "fan" && selectedDecoration === "none"
@@ -527,6 +534,26 @@ export default function ProductPage() {
     router.push("/cart")
   }
 
+  // 次のステップに進む
+  const goToNextStep = () => {
+    setCurrentStep(currentStep + 1)
+    // ページを少し上にスクロール
+    window.scrollTo({
+      top: window.scrollY - 100,
+      behavior: "smooth",
+    })
+  }
+
+  // 前のステップに戻る
+  const goToPrevStep = () => {
+    setCurrentStep(currentStep - 1)
+    // ページを少し上にスクロール
+    window.scrollTo({
+      top: window.scrollY - 100,
+      behavior: "smooth",
+    })
+  }
+
   // カスタムポップオーバーコンポーネント
   const InfoPopover = ({ name, title, children }) => (
     <Popover open={openPopovers[name]} onOpenChange={(open) => setOpenPopovers({ ...openPopovers, [name]: open })}>
@@ -552,596 +579,596 @@ export default function ProductPage() {
     </Popover>
   )
 
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-col md:flex-row gap-8">
-        {/* 商品画像とプレビュー */}
-        <div className="w-full md:w-1/2">
-          {/* メイン商品画像 - 選択された画像を表示 */}
-          <div className="relative aspect-square rounded-lg overflow-hidden mb-4">
-            <Image
-              src={currentMainImage || "/placeholder.svg"}
-              alt="ネームプレートキーホルダー"
-              fill
-              className="object-contain"
-              priority
-            />
-          </div>
-          {/* サブ画像ギャラリー - クリックで選択できるようにする */}
-          <div className="grid grid-cols-4 gap-2">
-            {productImages.map((image, index) => (
-              <div
-                key={index}
-                className={`relative aspect-square rounded-lg overflow-hidden cursor-pointer border-2 ${
-                  currentMainImage === image.src ? "border-blue-500" : "border-transparent"
-                }`}
-                onClick={() => setCurrentMainImage(image.src)}
-              >
-                <Image src={image.src || "/placeholder.svg"} alt={image.alt} fill className="object-cover" />
-              </div>
-            ))}
-          </div>
+  // ステップコンポーネント
+  const StepHeader = ({ number, title, description }) => (
+    <div className="mb-6 border-b pb-4">
+      <div className="flex items-center mb-2">
+        <div className="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-3">
+          {number}
         </div>
-
-        {/* 商品情報 */}
-        <div className="w-full md:w-1/2">
-          <h1 className="text-3xl font-bold mb-2">ネームプレートキーホルダー</h1>
-
-          <div className="mb-4">
-            <Badge className="bg-green-100 text-green-800 hover:bg-green-100">４〜7営業日で発送</Badge>
-            <Badge variant="outline" className="ml-2">
-              人気商品
-            </Badge>
-          </div>
-
-          <p className="text-2xl font-bold mb-2">¥1,300〜</p>
-          <p className="text-sm text-muted-foreground mb-4">送料：全国一律185円</p>
-          <p className="text-sm text-muted-foreground mb-2">※制作内容によって金額が変動します。</p>
-          <p className="text-sm text-muted-foreground mb-6">※この商品は注文個数で金額変動しません</p>
-
-          <div className="space-y-6 mb-6">
-            {/* テンプレート選択 */}
-            <div>
-              <div className="flex items-center mb-2">
-                <h3 className="font-medium">デザインテンプレート</h3>
-              </div>
-              <RadioGroup
-                defaultValue="horizontal"
-                className="grid grid-cols-3 gap-4"
-                onValueChange={handleTemplateChange}
-              >
-                <div>
-                  <RadioGroupItem value="horizontal" id="horizontal" className="peer sr-only" />
-                  <Label
-                    htmlFor="horizontal"
-                    className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                  >
-                    <div className="relative w-full aspect-square mb-2">
-                      <Image src="/horizontal-template.png" alt="横書き" fill className="object-contain" />
-                    </div>
-                    <span>横書き</span>
-                  </Label>
-                </div>
-                <div>
-                  <RadioGroupItem value="vertical" id="vertical" className="peer sr-only" />
-                  <Label
-                    htmlFor="vertical"
-                    className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                  >
-                    <div className="relative w-full aspect-square mb-2">
-                      <Image src="/vertical-template.png" alt="縦書き" fill className="object-contain" />
-                    </div>
-                    <span>縦書き</span>
-                  </Label>
-                </div>
-                <div>
-                  <RadioGroupItem value="fan" id="fan" className="peer sr-only" />
-                  <Label
-                    htmlFor="fan"
-                    className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                  >
-                    <div className="relative w-full aspect-square mb-2">
-                      <Image src="/fan-template.png" alt="推し活風" fill className="object-contain" />
-                    </div>
-                    <span>推し活風</span>
-                  </Label>
-                </div>
-              </RadioGroup>
-            </div>
-
-            {/* フォント選択 */}
-            <div>
-              <div className="flex items-center mb-2">
-                <h3 className="font-medium">フォント</h3>
-              </div>
-              <RadioGroup
-                defaultValue="overlapping"
-                className="grid grid-cols-3 gap-4"
-                onValueChange={handleFontChange}
-              >
-                <div>
-                  <RadioGroupItem value="overlapping" id="overlapping" className="peer sr-only" />
-                  <Label
-                    htmlFor="overlapping"
-                    className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                  >
-                    <div className="relative w-full aspect-square mb-2">
-                      <Image src="/font-overlapping.png" alt="かさなり文字" fill className="object-contain" />
-                    </div>
-                    <span className="text-center">かさなり文字</span>
-                  </Label>
-                </div>
-                <div>
-                  <RadioGroupItem value="pop" id="pop" className="peer sr-only" />
-                  <Label
-                    htmlFor="pop"
-                    className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                  >
-                    <div className="relative w-full aspect-square mb-2">
-                      <Image src="/font-pop.png" alt="ポップ" fill className="object-contain" />
-                    </div>
-                    <span className="text-center">ポップ</span>
-                  </Label>
-                </div>
-                <div>
-                  <RadioGroupItem value="mincho" id="mincho" className="peer sr-only" />
-                  <Label
-                    htmlFor="mincho"
-                    className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                  >
-                    <div className="relative w-full aspect-square mb-2">
-                      <Image src="/font-mincho.png" alt="明朝体" fill className="object-contain" />
-                    </div>
-                    <span className="text-center">明朝体</span>
-                  </Label>
-                </div>
-              </RadioGroup>
-            </div>
-
-            {/* 装飾文字 */}
-            <div>
-              <div className="flex items-center mb-2">
-                <h3 className="font-medium">装飾文字</h3>
-                <InfoPopover name="decoration" title="装飾文字">
-                  <p>1つのみ選択可</p>
-                  {template === "fan" && <p>※推し活風の場合は必須です</p>}
-                  {template !== "fan" && <p>※横書き・縦書きの場合は1文字としてカウントされます</p>}
-                  <p>「なし」を選ぶと追加料金はかかりません</p>
-                </InfoPopover>
-              </div>
-              <div className="grid grid-cols-5 gap-2">
-                {decorations.map((decoration, i) => (
-                  <div key={i} className="relative">
-                    {/* 推し活風の場合は「なし」を選択できないようにする */}
-                    {!(template === "fan" && decoration.id === "none") && (
-                      <>
-                        <input
-                          type="radio"
-                          name="decoration"
-                          id={`decoration-${i}`}
-                          className="peer sr-only"
-                          onChange={() => handleDecorationChange(decoration.id)}
-                          checked={selectedDecoration === decoration.id}
-                        />
-                        <label
-                          htmlFor={`decoration-${i}`}
-                          className={`flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-2 hover:bg-accent hover:text-accent-foreground peer-checked:border-primary cursor-pointer ${
-                            template === "fan" && decoration.id === "none" ? "opacity-50" : ""
-                          }`}
-                        >
-                          <div className="relative w-full aspect-square">
-                            {decoration.icon ? (
-                              decoration.icon
-                            ) : (
-                              <Image
-                                src={decoration.image || "/placeholder.svg"}
-                                alt={decoration.name}
-                                fill
-                                className="object-contain p-1"
-                              />
-                            )}
-                          </div>
-                          <span className="text-xs mt-1 text-center">{decoration.name}</span>
-                        </label>
-                      </>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* ベースカラー質感 */}
-            <div>
-              <div className="flex items-center mb-2">
-                <h3 className="font-medium">ベースカラー質感</h3>
-                <InfoPopover name="baseTexture" title="ベースカラー質感">
-                  <p>ノーマル：標準的な光沢のある仕上がり</p>
-                  <p>マット：落ち着いた質感の艶消し仕上げ</p>
-                  <p>シルク：上品な光沢感のある特殊仕上げ</p>
-                </InfoPopover>
-                <Button
-                  variant="link"
-                  size="sm"
-                  className="ml-2 text-blue-500 flex items-center"
-                  onClick={scrollToMaterialTab}
-                >
-                  <span className="text-xs">質感について</span>
-                  <ExternalLink className="h-3 w-3 ml-1" />
-                </Button>
-              </div>
-              <RadioGroup
-                defaultValue="normal"
-                className="grid grid-cols-3 gap-2"
-                onValueChange={handleBaseTextureChange}
-              >
-                {textureCategories.map((texture) => (
-                  <div key={texture.id}>
-                    <RadioGroupItem value={texture.id} id={`base-texture-${texture.id}`} className="peer sr-only" />
-                    <Label
-                      htmlFor={`base-texture-${texture.id}`}
-                      className="flex items-center justify-center rounded-md border-2 border-muted bg-popover p-2 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
-                    >
-                      {texture.name}
-                    </Label>
-                  </div>
-                ))}
-              </RadioGroup>
-            </div>
-
-            {/* ベースカラー */}
-            <div>
-              <div className="flex items-center mb-2">
-                <h3 className="font-medium">ベースカラー</h3>
-                <InfoPopover name="baseColor" title="ベースカラー">
-                  <p>プレートの背景色を選択</p>
-                  <p>選択した質感によって利用できる色が変わります</p>
-                  <p>テキストカラーとのコントラストを考慮して選択してください</p>
-                </InfoPopover>
-              </div>
-              <div className="grid grid-cols-6 gap-2 max-h-40 overflow-y-auto">
-                {getBaseColors().map((color, i) => (
-                  <div key={`base-${i}`} className="relative">
-                    <input
-                      type="radio"
-                      name="baseColor"
-                      id={`base-color-${i}`}
-                      className="peer sr-only"
-                      onChange={() => handleBaseColorChange(color.hex, color.name)}
-                      checked={baseColor === color.hex}
-                    />
-                    <label
-                      htmlFor={`base-color-${i}`}
-                      className="flex flex-col items-center justify-center rounded-md border-2 border-muted p-2 hover:bg-accent hover:text-accent-foreground peer-checked:border-primary cursor-pointer"
-                    >
-                      <div className="w-8 h-8 rounded-full border" style={{ backgroundColor: color.hex }}></div>
-                      <span className="text-xs mt-1 text-center line-clamp-2">{color.name}</span>
-                    </label>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* テキストカラー質感 */}
-            <div>
-              <div className="flex items-center mb-2">
-                <h3 className="font-medium">テキストカラー質感</h3>
-                <InfoPopover name="textTexture" title="テキストカラー質感">
-                  <p>ノーマル：標準的な光沢のある仕上がり</p>
-                  <p>マット：落ち着いた質感の艶消し仕上げ</p>
-                  <p>シルク：上品な光沢感のある特殊仕上げ</p>
-                </InfoPopover>
-                <Button
-                  variant="link"
-                  size="sm"
-                  className="ml-2 text-blue-500 flex items-center"
-                  onClick={scrollToMaterialTab}
-                >
-                  <span className="text-xs">質感について</span>
-                  <ExternalLink className="h-3 w-3 ml-1" />
-                </Button>
-              </div>
-              <RadioGroup
-                defaultValue="normal"
-                className="grid grid-cols-3 gap-2"
-                onValueChange={handleTextTextureChange}
-              >
-                {textureCategories.map((texture) => (
-                  <div key={texture.id}>
-                    <RadioGroupItem value={texture.id} id={`text-texture-${texture.id}`} className="peer sr-only" />
-                    <Label
-                      htmlFor={`text-texture-${texture.id}`}
-                      className="flex items-center justify-center rounded-md border-2 border-muted bg-popover p-2 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
-                    >
-                      {texture.name}
-                    </Label>
-                  </div>
-                ))}
-              </RadioGroup>
-            </div>
-
-            {/* テキストカラー */}
-            <div>
-              <div className="flex items-center mb-2">
-                <h3 className="font-medium">テキストカラー</h3>
-                <InfoPopover name="textColor" title="テキストカラー">
-                  <p>文字の色を選択</p>
-                  <p>選択した質感によって利用できる色が変わります</p>
-                  <p>ベースカラーとのコントラストを考慮して選択してください</p>
-                </InfoPopover>
-              </div>
-              <div className="grid grid-cols-6 gap-2 max-h-40 overflow-y-auto">
-                {getTextColors().map((color, i) => (
-                  <div key={`text-${i}`} className="relative">
-                    <input
-                      type="radio"
-                      name="textColor"
-                      id={`text-color-${i}`}
-                      className="peer sr-only"
-                      onChange={() => handleTextColorChange(color.hex, color.name)}
-                      checked={textColor === color.hex}
-                    />
-                    <label
-                      htmlFor={`text-color-${i}`}
-                      className="flex flex-col items-center justify-center rounded-md border-2 border-muted p-2 hover:bg-accent hover:text-accent-foreground peer-checked:border-primary cursor-pointer"
-                    >
-                      <div className="w-8 h-8 rounded-full border" style={{ backgroundColor: color.hex }}></div>
-                      <span className="text-xs mt-1 text-center line-clamp-2">{color.name}</span>
-                    </label>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* カラープレビュー */}
-            <div>
-              <div className="flex items-center mb-2">
-                <h3 className="font-medium">カラープレビュー</h3>
-                <InfoPopover name="preview" title="カラープレビュー">
-                  <p>選択した色とテンプレートのプレビュー</p>
-                  <p>実際の商品と色味が若干異なる場合があります</p>
-                  <p>画面下部に選択中のカラー名が表示されます</p>
-                </InfoPopover>
-              </div>
-              <div className="relative h-64 rounded-lg overflow-hidden mb-6 border shadow-md">
-                <div ref={svgContainerRef} className="w-full h-full"></div>
-                <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-70 text-white p-2 text-sm">
-                  <div className="flex justify-between">
-                    <span>ベース: {baseColorName}</span>
-                    <span>テキスト: {textColorName}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* プレートに入れる文字 */}
-            <div>
-              <div className="flex items-center mb-2">
-                <h3 className="font-medium">プレートに入れる文字</h3>
-                <InfoPopover name="text" title="プレートに入れる文字">
-                  <p>プレートに入れる文字を入力（最大20文字）</p>
-                  <p>ひらがな、カタカナ、漢字、英数字が使用可能</p>
-                  <p>「・」「、」「。」は文字数にカウントされません</p>
-                  <p>文字数によって料金が変動します</p>
-                </InfoPopover>
-              </div>
-              <Input
-                placeholder="名前やメッセージを入力"
-                maxLength={20}
-                value={inputText}
-                onChange={handleTextChange}
-              />
-              <p className="text-sm text-muted-foreground mt-1">20文字以内（残り{20 - inputText.length}文字）</p>
-              <p className="text-xs text-muted-foreground mt-1">※「・」「、」「。」は文字数にカウントされません</p>
-            </div>
-
-            {/* 名前のうしろにつける言葉（推し活風のみ） */}
-            {template === "fan" && (
-              <div>
-                <div className="flex items-center mb-2">
-                  <h3 className="font-medium">名前の後に付ける言葉</h3>
-                  <InfoPopover name="suffix" title="名前の後に付ける言葉">
-                    <p>推し活風テンプレートで名前の後に付ける言葉</p>
-                    <p>「ちゃん」「くん」「さま」「さん」「推し」から選択できます</p>
-                  </InfoPopover>
-                </div>
-                <Select defaultValue="chan" onValueChange={handleSuffixChange}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="選択してください" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="chan">ちゃん</SelectItem>
-                    <SelectItem value="kun">くん</SelectItem>
-                    <SelectItem value="sama">さま</SelectItem>
-                    <SelectItem value="san">さん</SelectItem>
-                    <SelectItem value="oshi">推し</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-          </div>
-
-          <div className="flex flex-col gap-4 mb-8">
-            <div className="bg-gray-50 p-4 rounded-lg border">
-              <div className="flex justify-between items-center">
-                <span className="text-lg">合計金額:</span>
-                <span className="text-2xl font-bold">¥{price.toLocaleString()}</span>
-              </div>
-              <div className="text-sm text-muted-foreground mt-1">
-                {(() => {
-                  const decorationCount = selectedDecoration !== "none" && template !== "fan" ? 1 : 0
-                  const totalCount = charCount + decorationCount
-
-                  if (template === "fan") {
-                    return totalCount > 3
-                      ? `基本料金 ¥1,300 + 追加料金 ¥${((totalCount - 3) * 120).toLocaleString()} (${totalCount - 3}文字分)`
-                      : "基本料金 ¥1,300"
-                  } else {
-                    return totalCount > 4
-                      ? `基本料金 ¥1,300 + 追加料金 ¥${((totalCount - 4) * 120).toLocaleString()} (${totalCount - 4}文字分${decorationCount ? "・装飾文字含む" : ""})`
-                      : "基本料金 ¥1,300"
-                  }
-                })()}
-              </div>
-            </div>
-            <div className="flex gap-4">
-              {addedToCart ? (
-                <Button className="flex-1" size="lg" variant="outline" onClick={goToCart}>
-                  <Check className="mr-2 h-5 w-5" />
-                  カートに追加済み - カートへ進む
-                </Button>
-              ) : (
-                <Button className="flex-1" size="lg" disabled={isAddToCartDisabled()} onClick={handleAddToCart}>
-                  <ShoppingCart className="mr-2 h-5 w-5" />
-                  カートに追加
-                </Button>
-              )}
-              <Button variant="outline" size="icon" className="h-12 w-12">
-                <Heart className="h-5 w-5" />
-              </Button>
-              <Button variant="outline" size="icon" className="h-12 w-12">
-                <Share2 className="h-5 w-5" />
-              </Button>
-            </div>
-          </div>
-
-          <Tabs id="product-tabs" defaultValue="price" value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="price">料金表</TabsTrigger>
-              <TabsTrigger value="material">素材・質感</TabsTrigger>
-              <TabsTrigger value="specs">商品仕様</TabsTrigger>
-              <TabsTrigger value="details">詳細</TabsTrigger>
-              <TabsTrigger value="shipping">配送情報</TabsTrigger>
-            </TabsList>
-            <TabsContent value="price" className="pt-4">
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>文字数</TableHead>
-                      <TableHead>横書き・縦書き (円)</TableHead>
-                      <TableHead>推し活風 (円)</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {[...Array(20)].map((_, i) => (
-                      <TableRow key={i}>
-                        <TableCell>{i + 1}</TableCell>
-                        <TableCell>{i < 4 ? "¥1,300" : `¥${(1300 + (i - 3) * 120).toLocaleString()}`}</TableCell>
-                        <TableCell>{i < 3 ? "¥1,300" : `¥${(1300 + (i - 2) * 120).toLocaleString()}`}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </TabsContent>
-            <TabsContent value="details" className="pt-4">
-              <ul className="list-disc pl-5 space-y-2 text-sm">
-                <li>カスタマイズ可能なテキスト（1〜20文字）</li>
-                <li>3種類のテンプレートから選択可能</li>
-                <li>3種類のフォントスタイル</li>
-                <li>10種類の装飾文字（オプション）</li>
-                <li>2色まで選択可能</li>
-                <li>3種類のアタッチメント（無料）</li>
-                <li>耐久性に優れた設計</li>
-              </ul>
-            </TabsContent>
-            <TabsContent value="shipping" className="pt-4">
-              <div className="space-y-2 text-sm">
-                <p>送料：全国一律185円（税込）</p>
-                <p>通常配送: 4-7営業日以内に発送</p>
-                <p>速達配送: 1-2営業日以内に発送（追加料金あり）</p>
-                <p>※この商品は注文個数で金額変動しません</p>
-              </div>
-            </TabsContent>
-            <TabsContent value="material" className="pt-4">
-              <div className="space-y-4">
-                <div>
-                  <h3 className="font-medium mb-2">素材について</h3>
-                  <p className="text-sm mb-2">素材はPLA（植物由来のプラスチック）で人にも地球にも優しい素材です。</p>
-                  <p className="text-sm">軽量かつ丈夫で、長くお使いいただけます。</p>
-                </div>
-
-                <div>
-                  <h3 className="font-medium mb-2">質感の種類</h3>
-
-                  <div className="mb-4">
-                    <h4 className="text-sm font-medium mb-1">ノーマル</h4>
-                    <p className="text-sm mb-2">
-                      標準的な光沢のある仕上がりです。発色が良く、鮮やかな色合いが特徴です。
-                    </p>
-                    <div className="grid grid-cols-3 gap-2">
-                      <div className="aspect-video relative rounded overflow-hidden">
-                        <Image src="/texture-normal-1.png" alt="ノーマル質感 赤" fill className="object-cover" />
-                      </div>
-                      <div className="aspect-video relative rounded overflow-hidden">
-                        <Image src="/texture-normal-2.png" alt="ノーマル質感 白" fill className="object-cover" />
-                      </div>
-                      <div className="aspect-video relative rounded overflow-hidden">
-                        <Image src="/texture-normal-3.png" alt="ノーマル質感 黒" fill className="object-cover" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mb-4">
-                    <h4 className="text-sm font-medium mb-1">マット</h4>
-                    <p className="text-sm mb-2">
-                      落ち着いた質感の艶消し仕上げです。光の反射が少なく、上品な印象を与えます。
-                    </p>
-                    <div className="grid grid-cols-3 gap-2">
-                      <div className="aspect-video relative rounded overflow-hidden">
-                        <Image src="/texture-matte-1.png" alt="マット質感 赤" fill className="object-cover" />
-                      </div>
-                      <div className="aspect-video relative rounded overflow-hidden">
-                        <Image src="/texture-matte-2.png" alt="マット質感 白" fill className="object-cover" />
-                      </div>
-                      <div className="aspect-video relative rounded overflow-hidden">
-                        <Image src="/texture-matte-3.png" alt="マット質感 黒" fill className="object-cover" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h4 className="text-sm font-medium mb-1">シルク（光沢）</h4>
-                    <p className="text-sm mb-2">
-                      上品な光沢感のある特殊仕上げです。高級感があり、特別な印象を与えます。
-                    </p>
-                    <div className="grid grid-cols-3 gap-2">
-                      <div className="aspect-video relative rounded overflow-hidden">
-                        <Image src="/texture-silk-1.png" alt="シルク質感 赤" fill className="object-cover" />
-                      </div>
-                      <div className="aspect-video relative rounded overflow-hidden">
-                        <Image src="/texture-silk-2.png" alt="シルク質感 白" fill className="object-cover" />
-                      </div>
-                      <div className="aspect-video relative rounded overflow-hidden">
-                        <Image src="/texture-silk-3.png" alt="シルク質感 グレー" fill className="object-cover" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="specs" className="pt-4">
-              <Table>
-                <TableBody>
-                  <TableRow>
-                    <TableCell className="font-medium">素材</TableCell>
-                    <TableCell>PLA（植物由来のプラスチック）</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">サイズ</TableCell>
-                    <TableCell>縦幅 約20mm　横幅 文字数によって変動　厚み 約3mm</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">包装</TableCell>
-                    <TableCell>OPP袋個包装</TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </TabsContent>
-          </Tabs>
-        </div>
+        <h3 className="text-xl font-bold">{title}</h3>
       </div>
+      <p className="text-gray-600 ml-11">{description}</p>
     </div>
   )
-}
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Header />
+
+      <div className="container mx-auto px-4 py-8 flex-grow">
+        <div className="flex flex-col md:flex-row gap-8">
+          {/* 商品画像とプレビュー */}
+          <div className="w-full md:w-1/2">
+            {/* メイン商品画像 - 選択された画像を表示 */}
+            <div className="relative aspect-square rounded-lg overflow-hidden mb-4">
+              <Image
+                src={currentMainImage || "/placeholder.svg"}
+                alt="ネームプレートキーホルダー"
+                fill
+                className="object-contain"
+                priority
+              />
+            </div>
+            {/* サブ画像ギャラリー - クリックで選択できるようにする */}
+            <div className="grid grid-cols-4 gap-2">
+              {productImages.map((image, index) => (
+                <div
+                  key={index}
+                  className={`relative aspect-square rounded-lg overflow-hidden cursor-pointer border-2 ${
+                    currentMainImage === image.src ? "border-blue-500" : "border-transparent"
+                  }`}
+                  onClick={() => setCurrentMainImage(image.src)}
+                >
+                  <Image src={image.src || "/placeholder.svg"} alt={image.alt} fill className="object-cover" />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 商品情報 */}
+          <div className="w-full md:w-1/2">
+            <h1 className="text-3xl font-bold mb-2">ネームプレートキーホルダー</h1>
+
+            <div className="mb-4">
+              <Badge className="bg-green-100 text-green-800 hover:bg-green-100">４〜7営業日で発送</Badge>
+              <Badge variant="outline" className="ml-2">
+                人気商品
+              </Badge>
+            </div>
+
+            <p className="text-2xl font-bold mb-2">¥1,300〜</p>
+            <p className="text-sm text-muted-foreground mb-4">送料：全国一律185円</p>
+            <p className="text-sm text-muted-foreground mb-2">※制作内容によって金額が変動します。</p>
+            <p className="text-sm text-muted-foreground mb-6">※この商品は注文個数で金額変動しません</p>
+
+            <div className="space-y-6 mb-6">
+              {/* ステップ1: デザインテンプレート選択 */}
+              <div className={`border rounded-lg p-6 ${currentStep === 1 ? "bg-blue-50" : ""}`}>
+                <StepHeader
+                  number={1}
+                  title="デザインテンプレートを選択"
+                  description="ネームプレートの形状を選びましょう。横書き、縦書き、推し活風から選べます。"
+                />
+
+                <RadioGroup
+                  defaultValue="horizontal"
+                  className="grid grid-cols-3 gap-4"
+                  onValueChange={handleTemplateChange}
+                >
+                  <div>
+                    <RadioGroupItem value="horizontal" id="horizontal" className="peer sr-only" />
+                    <Label
+                      htmlFor="horizontal"
+                      className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                    >
+                      <div className="relative w-full aspect-square mb-2">
+                        <Image src="/horizontal-template.png" alt="横書き" fill className="object-contain" />
+                      </div>
+                      <span>横書き</span>
+                    </Label>
+                  </div>
+                  <div>
+                    <RadioGroupItem value="vertical" id="vertical" className="peer sr-only" />
+                    <Label
+                      htmlFor="vertical"
+                      className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                    >
+                      <div className="relative w-full aspect-square mb-2">
+                        <Image src="/vertical-template.png" alt="縦書き" fill className="object-contain" />
+                      </div>
+                      <span>縦書き</span>
+                    </Label>
+                  </div>
+                  <div>
+                    <RadioGroupItem value="fan" id="fan" className="peer sr-only" />
+                    <Label
+                      htmlFor="fan"
+                      className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                    >
+                      <div className="relative w-full aspect-square mb-2">
+                        <Image src="/fan-template.png" alt="推し活風" fill className="object-contain" />
+                      </div>
+                      <span>推し活風</span>
+                    </Label>
+                  </div>
+                </RadioGroup>
+
+                <div className="mt-6 flex justify-end">
+                  <Button onClick={goToNextStep}>次へ進む</Button>
+                </div>
+              </div>
+
+              {/* ステップ2: フォントと装飾文字 */}
+              {currentStep >= 2 && (
+                <div className={`border rounded-lg p-6 ${currentStep === 2 ? "bg-blue-50" : ""}`}>
+                  <StepHeader
+                    number={2}
+                    title="フォントと装飾文字を選択"
+                    description="文字のスタイルと装飾を選びましょう。推し活風の場合は装飾文字が必須です。"
+                  />
+
+                  {/* フォント選択 */}
+                  <div className="mb-6">
+                    <div className="flex items-center mb-2">
+                      <h3 className="font-medium">フォント</h3>
+                    </div>
+                    <RadioGroup
+                      defaultValue="overlapping"
+                      className="grid grid-cols-3 gap-4"
+                      onValueChange={handleFontChange}
+                    >
+                      <div>
+                        <RadioGroupItem value="overlapping" id="overlapping" className="peer sr-only" />
+                        <Label
+                          htmlFor="overlapping"
+                          className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                        >
+                          <div className="relative w-full aspect-square mb-2">
+                            <Image src="/font-overlapping.png" alt="かさなり文字" fill className="object-contain" />
+                          </div>
+                          <span className="text-center">かさなり文字</span>
+                        </Label>
+                      </div>
+                      <div>
+                        <RadioGroupItem value="pop" id="pop" className="peer sr-only" />
+                        <Label
+                          htmlFor="pop"
+                          className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                        >
+                          <div className="relative w-full aspect-square mb-2">
+                            <Image src="/font-pop.png" alt="ポップ" fill className="object-contain" />
+                          </div>
+                          <span className="text-center">ポップ</span>
+                        </Label>
+                      </div>
+                      <div>
+                        <RadioGroupItem value="mincho" id="mincho" className="peer sr-only" />
+                        <Label
+                          htmlFor="mincho"
+                          className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                        >
+                          <div className="relative w-full aspect-square mb-2">
+                            <Image src="/font-mincho.png" alt="明朝体" fill className="object-contain" />
+                          </div>
+                          <span className="text-center">明朝体</span>
+                        </Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+
+                  {/* 装飾文字 */}
+                  <div>
+                    <div className="flex items-center mb-2">
+                      <h3 className="font-medium">装飾文字</h3>
+                      <InfoPopover name="decoration" title="装飾文字">
+                        <p>1つのみ選択可</p>
+                        {template === "fan" && <p>※推し活風の場合は必須です</p>}
+                        {template !== "fan" && <p>※横書き・縦書きの場合は1文字としてカウントされます</p>}
+                        <p>「なし」を選ぶと追加料金はかかりません</p>
+                      </InfoPopover>
+                    </div>
+                    <div className="grid grid-cols-5 gap-2">
+                      {decorations.map((decoration, i) => (
+                        <div key={i} className="relative">
+                          {/* 推し活風の場合は「なし」を選択できないようにする */}
+                          {!(template === "fan" && decoration.id === "none") && (
+                            <>
+                              <input
+                                type="radio"
+                                name="decoration"
+                                id={`decoration-${i}`}
+                                className="peer sr-only"
+                                onChange={() => handleDecorationChange(decoration.id)}
+                                checked={selectedDecoration === decoration.id}
+                              />
+                              <label
+                                htmlFor={`decoration-${i}`}
+                                className={`flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-2 hover:bg-accent hover:text-accent-foreground peer-checked:border-primary cursor-pointer ${
+                                  template === "fan" && decoration.id === "none" ? "opacity-50" : ""
+                                }`}
+                              >
+                                <div className="relative w-full aspect-square">
+                                  {decoration.icon ? (
+                                    decoration.icon
+                                  ) : (
+                                    <Image
+                                      src={decoration.image || "/placeholder.svg"}
+                                      alt={decoration.name}
+                                      fill
+                                      className="object-contain p-1"
+                                    />
+                                  )}
+                                </div>
+                                <span className="text-xs mt-1 text-center">{decoration.name}</span>
+                              </label>
+                            </>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 推し活風の場合の接尾辞選択 */}
+                  {template === "fan" && (
+                    <div className="mt-6">
+                      <div className="flex items-center mb-2">
+                        <h3 className="font-medium">名前の後に付ける言葉</h3>
+                        <InfoPopover name="suffix" title="名前の後に付ける言葉">
+                          <p>推し活風テンプレートで名前の後に付ける言葉</p>
+                          <p>「ちゃん」「くん」「さま」「さん」「推し」から選択できます</p>
+                        </InfoPopover>
+                      </div>
+                      <Select defaultValue="chan" onValueChange={handleSuffixChange}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="選択してください" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="chan">ちゃん</SelectItem>
+                          <SelectItem value="kun">くん</SelectItem>
+                          <SelectItem value="sama">さま</SelectItem>
+                          <SelectItem value="san">さん</SelectItem>
+                          <SelectItem value="oshi">推し</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
+                  <div className="mt-6 flex justify-between">
+                    <Button variant="outline" onClick={goToPrevStep}>
+                      戻る
+                    </Button>
+                    <Button onClick={goToNextStep}>次へ進む</Button>
+                  </div>
+                </div>
+              )}
+
+              {/* ステップ3: カラー選択 */}
+              {currentStep >= 3 && (
+                <div className={`border rounded-lg p-6 ${currentStep === 3 ? "bg-blue-50" : ""}`}>
+                  <StepHeader
+                    number={3}
+                    title="カラーを選択"
+                    description="ベースカラーとテキストカラーの質感と色を選びましょう。"
+                  />
+
+                  <div className="mb-6">
+                    <div className="flex items-center mb-2">
+                      <h3 className="font-medium">ベースカラー質感</h3>
+                      <InfoPopover name="baseTexture" title="ベースカラー質感">
+                        <p>ノーマル：標準的な光沢のある仕上がり</p>
+                        <p>マット：落ち着いた質感の艶消し仕上げ</p>
+                        <p>シルク：上品な光沢感のある特殊仕上げ</p>
+                      </InfoPopover>
+                      <Button
+                        variant="link"
+                        className="text-xs p-0 h-auto ml-2 text-blue-500"
+                        onClick={scrollToMaterialTab}
+                      >
+                        質感について
+                      </Button>
+                    </div>
+                    <RadioGroup
+                      defaultValue="normal"
+                      className="grid grid-cols-3 gap-2"
+                      onValueChange={handleBaseTextureChange}
+                    >
+                      {textureCategories.map((texture) => (
+                        <div key={texture.id}>
+                          <RadioGroupItem
+                            value={texture.id}
+                            id={`base-texture-${texture.id}`}
+                            className="peer sr-only"
+                          />
+                          <Label
+                            htmlFor={`base-texture-${texture.id}`}
+                            className="flex items-center justify-center rounded-md border-2 border-muted bg-popover p-2 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
+                          >
+                            {texture.name}
+                          </Label>
+                        </div>
+                      ))}
+                    </RadioGroup>
+                  </div>
+
+                  {/* ベースカラー */}
+                  <div className="mb-6">
+                    <div className="flex items-center mb-2">
+                      <h3 className="font-medium">ベースカラー</h3>
+                      <InfoPopover name="baseColor" title="ベースカラー">
+                        <p>プレートの背景色を選択</p>
+                        <p>選択した質感によって利用できる色が変わります</p>
+                        <p>テキストカラーとのコントラストを考慮して選択してください</p>
+                      </InfoPopover>
+                    </div>
+                    <div className="grid grid-cols-6 gap-2 max-h-40 overflow-y-auto">
+                      {getBaseColors().map((color, i) => (
+                        <div key={`base-${i}`} className="relative">
+                          <input
+                            type="radio"
+                            name="baseColor"
+                            id={`base-color-${i}`}
+                            className="peer sr-only"
+                            onChange={() => handleBaseColorChange(color.hex, color.name)}
+                            checked={baseColor === color.hex}
+                          />
+                          <label
+                            htmlFor={`base-color-${i}`}
+                            className="flex flex-col items-center justify-center rounded-md border-2 border-muted p-2 hover:bg-accent hover:text-accent-foreground peer-checked:border-primary cursor-pointer"
+                          >
+                            <div className="w-8 h-8 rounded-full border" style={{ backgroundColor: color.hex }}></div>
+                            <span className="text-xs mt-1 text-center line-clamp-2">{color.name}</span>
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="mb-6">
+                    <div className="flex items-center mb-2">
+                      <h3 className="font-medium">テキストカラー質感</h3>
+                      <InfoPopover name="textTexture" title="テキストカラー質感">
+                        <p>ノーマル：標準的な光沢のある仕上がり</p>
+                        <p>マット：落ち着いた質感の艶消し仕上げ</p>
+                        <p>シルク：上品な光沢感のある特殊仕上げ</p>
+                      </InfoPopover>
+                      <Button
+                        variant="link"
+                        className="text-xs p-0 h-auto ml-2 text-blue-500"
+                        onClick={scrollToMaterialTab}
+                      >
+                        質感について
+                      </Button>
+                    </div>
+                    <RadioGroup
+                      defaultValue="normal"
+                      className="grid grid-cols-3 gap-2"
+                      onValueChange={handleTextTextureChange}
+                    >
+                      {textureCategories.map((texture) => (
+                        <div key={texture.id}>
+                          <RadioGroupItem
+                            value={texture.id}
+                            id={`text-texture-${texture.id}`}
+                            className="peer sr-only"
+                          />
+                          <Label
+                            htmlFor={`text-texture-${texture.id}`}
+                            className="flex items-center justify-center rounded-md border-2 border-muted bg-popover p-2 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
+                          >
+                            {texture.name}
+                          </Label>
+                        </div>
+                      ))}
+                    </RadioGroup>
+                  </div>
+
+                  {/* テキストカラー */}
+                  <div>
+                    <div className="flex items-center mb-2">
+                      <h3 className="font-medium">テキストカラー</h3>
+                      <InfoPopover name="textColor" title="テキストカラー">
+                        <p>文字の色を選択</p>
+                        <p>選択した質感によって利用できる色が変わります</p>
+                        <p>ベースカラーとのコントラストを考慮して選択してください</p>
+                      </InfoPopover>
+                    </div>
+                    <div className="grid grid-cols-6 gap-2 max-h-40 overflow-y-auto">
+                      {getTextColors().map((color, i) => (
+                        <div key={`text-${i}`} className="relative">
+                          <input
+                            type="radio"
+                            name="textColor"
+                            id={`text-color-${i}`}
+                            className="peer sr-only"
+                            onChange={() => handleTextColorChange(color.hex, color.name)}
+                            checked={textColor === color.hex}
+                          />
+                          <label
+                            htmlFor={`text-color-${i}`}
+                            className="flex flex-col items-center justify-center rounded-md border-2 border-muted p-2 hover:bg-accent hover:text-accent-foreground peer-checked:border-primary cursor-pointer"
+                          >
+                            <div className="w-8 h-8 rounded-full border" style={{ backgroundColor: color.hex }}></div>
+                            <span className="text-xs mt-1 text-center line-clamp-2">{color.name}</span>
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="mt-6 flex justify-between">
+                    <Button variant="outline" onClick={goToPrevStep}>
+                      戻る
+                    </Button>
+                    <Button onClick={goToNextStep}>次へ進む</Button>
+                  </div>
+                </div>
+              )}
+
+              {/* ステップ4: プレビューと文字入力 */}
+              {currentStep >= 4 && (
+                <div className={`border rounded-lg p-6 ${currentStep === 4 ? "bg-blue-50" : ""}`}>
+                  <StepHeader
+                    number={4}
+                    title="文字入力とプレビュー確認"
+                    description="プレートに入れる文字を入力し、プレビューで確認しましょう。"
+                  />
+
+                  {/* カラープレビュー */}
+                  <div className="mb-6">
+                    <div className="flex items-center mb-2">
+                      <h3 className="font-medium">カラープレビュー</h3>
+                      <InfoPopover name="preview" title="カラープレビュー">
+                        <p>選択した色とテンプレートのプレビュー</p>
+                        <p>実際の商品と色味が若干異なる場合があります</p>
+                        <p>画面下部に選択中のカラー名が表示されます</p>
+                      </InfoPopover>
+                    </div>
+                    <div className="relative h-64 rounded-lg overflow-hidden mb-6 border shadow-md">
+                      <div ref={svgContainerRef} className="w-full h-full"></div>
+                      <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-70 text-white p-2 text-sm">
+                        <div className="flex justify-between">
+                          <span>ベース: {baseColorName}</span>
+                          <span>テキスト: {textColorName}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* プレートに入れる文字 */}
+                  <div>
+                    <div className="flex items-center mb-2">
+                      <h3 className="font-medium">プレートに入れる文字</h3>
+                      <InfoPopover name="text" title="プレートに入れる文字">
+                        <p>プレートに入れる文字を入力（最大20文字）</p>
+                        <p>ひらがな、カタカナ、漢字、英数字が使用可能</p>
+                        <p>「・」「、」「。」は文字数にカウントされません</p>
+                        <p>文字数によって料金が変動します</p>
+                      </InfoPopover>
+                    </div>
+                    <Input
+                      placeholder="名前やメッセージを入力"
+                      maxLength={20}
+                      value={inputText}
+                      onChange={handleTextChange}
+                    />
+                    <p className="text-sm text-muted-foreground mt-1">20文字以内（残り{20 - inputText.length}文字）</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      ※「・」「、」「。」は文字数にカウントされません
+                    </p>
+                  </div>
+
+                  <div className="mt-6 flex justify-between">
+                    <Button variant="outline" onClick={goToPrevStep}>
+                      戻る
+                    </Button>
+                    <Button onClick={goToNextStep}>次へ進む</Button>
+                  </div>
+                </div>
+              )}
+
+              {/* ステップ5: 注文確定 */}
+              {currentStep >= 5 && (
+                <div className={`border rounded-lg p-6 ${currentStep === 5 ? "bg-blue-50" : ""}`}>
+                  <StepHeader
+                    number={5}
+                    title="注文内容の確認"
+                    description="選択内容と金額を確認して、カートに追加しましょう。"
+                  />
+
+                  <div className="bg-gray-50 p-4 rounded-lg border mb-6">
+                    <h3 className="font-medium mb-2">注文内容</h3>
+                    <ul className="space-y-2 text-sm">
+                      <li>
+                        <span className="font-medium">テンプレート:</span>{" "}
+                        {template === "horizontal" ? "横書き" : template === "vertical" ? "縦書き" : "推し活風"}
+                      </li>
+                      <li>
+                        <span className="font-medium">フォント:</span>{" "}
+                        {selectedFont === "overlapping" ? "かさなり文字" : selectedFont === "pop" ? "ポップ" : "明朝体"}
+                      </li>
+                      <li>
+                        <span className="font-medium">装飾文字:</span>{" "}
+                        {decorations.find((d) => d.id === selectedDecoration)?.name || "なし"}
+                      </li>
+                      <li>
+                        <span className="font-medium">ベースカラー:</span> {baseColorName}（
+                        {baseTexture === "normal" ? "ノーマル" : baseTexture === "matte" ? "マット" : "シルク"}）
+                      </li>
+                      <li>
+                        <span className="font-medium">テキストカラー:</span> {textColorName}（
+                        {textTexture === "normal" ? "ノーマル" : textTexture === "matte" ? "マット" : "シルク"}）
+                      </li>
+                      <li>
+                        <span className="font-medium">入力文字:</span> {inputText || "（未入力）"}
+                      </li>
+                      {template === "fan" && (
+                        <li>
+                          <span className="font-medium">接尾辞:</span>{" "}
+                          {suffix === "chan"
+                            ? "ちゃん"
+                            : suffix === "kun"
+                              ? "くん"
+                              : suffix === "sama"
+                                ? "さま"
+                                : suffix === "san"
+                                  ? "さん"
+                                  : "推し"}
+                        </li>
+                      )}
+                    </ul>
+                  </div>
+
+                  <div className="bg-gray-50 p-4 rounded-lg border mb-6">
+                    <div className="flex justify-between items-center">
+                      <span className="text-lg">合計金額:</span>
+                      <span className="text-2xl font-bold">¥{price.toLocaleString()}</span>
+                    </div>
+                    <div className="text-sm text-muted-foreground mt-1">
+                      {(() => {
+                        const decorationCount = selectedDecoration !== "none" && template !== "fan" ? 1 : 0
+                        const totalCount = charCount + decorationCount
+
+                        if (template === "fan") {
+                          return totalCount > 3
+                            ? `基本料金 ¥1,300 + 追加料金 ¥${((totalCount - 3) * 120).toLocaleString()} (${totalCount - 3}文字分)`
+                            : "基本料金 ¥1,300"
+                        } else {
+                          return totalCount > 4
+                            ? `基本料金 ¥1,300 + 追加料金 ¥${((totalCount - 4) * 120).toLocaleString()} (${totalCount - 4}文字分${decorationCount ? "・装飾文字含む" : ""})`
+                            : "基本料金 ¥1,300"
+                        }
+                      })()}
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4">
+                    {addedToCart ? (
+                      <Button className="flex-1" size="lg" variant="outline" onClick={goToCart}>
+                        <Check className="mr-2 h-5 w-5" />
+                        カートに追加済み - カートへ進む
+                      </Button>
+                    ) : (
+                      <Button className="flex-1" size="lg" disabled={isAddToCartDisabled()} onClick={handleAddToCart}>
+                        <ShoppingCart className="mr-2 h-5 w-5" />
+                        カートに追加
+                      </Button>
+                    )}
+                    <Button variant="outline" size="icon" className="h-12 w-12">
+                      <Heart className="h-5 w-5" />
+                    </Button>
+                    <Button variant="outline" size="icon" className="h-12 w-12">
+                      <Share2 className="h-5 w-5" />
+                    </Button>
+                  </div>
+
+                  <div className="mt-6 flex justify-start">
+                    <Button variant="outline" onClick={goToPrevStep}>
+                      戻る
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <Tabs id="product-tabs"></Tabs>\

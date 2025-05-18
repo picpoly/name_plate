@@ -34,6 +34,7 @@ type CartContextType = {
   clearCart: () => void
   getCartTotal: () => number
   getCartCount: () => number
+  updateItem: (id: string, updatedItem: CartItem) => void
 }
 
 // デフォルト値を持つカートコンテキストを作成
@@ -45,6 +46,7 @@ const CartContext = createContext<CartContextType>({
   clearCart: () => {},
   getCartTotal: () => 0,
   getCartCount: () => 0,
+  updateItem: () => {},
 })
 
 // カートプロバイダーコンポーネント
@@ -110,6 +112,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  // カート内の商品を更新する関数
+  const updateItem = (id: string, updatedItem: CartItem) => {
+    setItems((prevItems) => prevItems.map((item) => (item.id === id ? updatedItem : item)))
+  }
+
   // カートを空にする関数
   const clearCart = () => {
     setItems([])
@@ -136,6 +143,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         clearCart,
         getCartTotal,
         getCartCount,
+        updateItem,
       }}
     >
       {children}
