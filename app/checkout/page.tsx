@@ -10,8 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { ArrowLeft, CreditCard, ShoppingBag, Check } from "lucide-react"
+import { ArrowLeft, ShoppingBag, Check } from "lucide-react"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { createCheckoutSession } from "@/app/actions/stripe"
@@ -21,7 +20,6 @@ export default function CheckoutPage() {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [orderComplete, setOrderComplete] = useState(false)
-  const [paymentMethod, setPaymentMethod] = useState("credit-card")
 
   // フォームの状態
   const [formData, setFormData] = useState({
@@ -220,55 +218,6 @@ export default function CheckoutPage() {
                 <Label htmlFor="address2">部屋番号など（任意）</Label>
                 <Input id="address2" name="address2" value={formData.address2} onChange={handleInputChange} />
               </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-              <h2 className="text-lg font-semibold mb-4">お支払い方法</h2>
-
-              <RadioGroup
-                defaultValue="credit-card"
-                value={paymentMethod}
-                onValueChange={setPaymentMethod}
-                className="space-y-3"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="credit-card" id="credit-card" />
-                  <Label htmlFor="credit-card" className="flex items-center">
-                    <CreditCard className="mr-2 h-4 w-4" />
-                    クレジットカード
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="bank-transfer" id="bank-transfer" />
-                  <Label htmlFor="bank-transfer">銀行振込</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="convenience-store" id="convenience-store" />
-                  <Label htmlFor="convenience-store">コンビニ決済</Label>
-                </div>
-              </RadioGroup>
-
-              {paymentMethod === "credit-card" && (
-                <div className="mt-4 p-4 bg-gray-50 rounded-md">
-                  <p className="text-sm text-gray-500 mb-2">※実際の決済処理は実装されていません</p>
-                  <div className="grid grid-cols-1 gap-4">
-                    <div>
-                      <Label htmlFor="card-number">カード番号</Label>
-                      <Input id="card-number" placeholder="1234 5678 9012 3456" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="expiry">有効期限</Label>
-                        <Input id="expiry" placeholder="MM/YY" />
-                      </div>
-                      <div>
-                        <Label htmlFor="cvc">セキュリティコード</Label>
-                        <Input id="cvc" placeholder="123" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
 
             <div className="bg-white rounded-lg shadow-sm p-6 mb-6">

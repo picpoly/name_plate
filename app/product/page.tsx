@@ -662,6 +662,7 @@ export default function ProductPage() {
                 fill
                 className="object-contain"
                 priority
+                unoptimized={currentMainImage.startsWith("/texture/") || currentMainImage.startsWith("/decoration-")}
               />
             </div>
             {/* サブ画像ギャラリー - クリックで選択できるようにする */}
@@ -674,7 +675,13 @@ export default function ProductPage() {
                   }`}
                   onClick={() => setCurrentMainImage(image.src)}
                 >
-                  <Image src={image.src || "/placeholder.svg"} alt={image.alt} fill className="object-cover" />
+                  <Image
+                    src={image.src || "/placeholder.svg"}
+                    alt={image.alt}
+                    fill
+                    className="object-cover"
+                    unoptimized={image.src?.startsWith("/texture/") || image.src?.startsWith("/decoration-")}
+                  />
                 </div>
               ))}
             </div>
@@ -717,7 +724,13 @@ export default function ProductPage() {
                       className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
                     >
                       <div className="relative w-full aspect-square mb-2">
-                        <Image src="/horizontal-template.png" alt="横書き" fill className="object-contain" />
+                        <Image
+                          src="/horizontal-template.png"
+                          alt="横書き"
+                          fill
+                          className="object-contain"
+                          unoptimized
+                        />
                       </div>
                       <span>横書き</span>
                     </Label>
@@ -729,7 +742,7 @@ export default function ProductPage() {
                       className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
                     >
                       <div className="relative w-full aspect-square mb-2">
-                        <Image src="/vertical-template.png" alt="縦書き" fill className="object-contain" />
+                        <Image src="/vertical-template.png" alt="縦書き" fill className="object-contain" unoptimized />
                       </div>
                       <span>縦書き</span>
                     </Label>
@@ -741,7 +754,7 @@ export default function ProductPage() {
                       className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
                     >
                       <div className="relative w-full aspect-square mb-2">
-                        <Image src="/fan-template.png" alt="推し活風" fill className="object-contain" />
+                        <Image src="/fan-template.png" alt="推し活風" fill className="object-contain" unoptimized />
                       </div>
                       <span>推し活風</span>
                     </Label>
@@ -779,7 +792,13 @@ export default function ProductPage() {
                           className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
                         >
                           <div className="relative w-full aspect-square mb-2">
-                            <Image src="/font-overlapping.png" alt="かさなり文字" fill className="object-contain" />
+                            <Image
+                              src="/font-overlapping.png"
+                              alt="かさなり文字"
+                              fill
+                              className="object-contain"
+                              unoptimized
+                            />
                           </div>
                           <span className="text-center">かさなり文字</span>
                         </Label>
@@ -791,7 +810,7 @@ export default function ProductPage() {
                           className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
                         >
                           <div className="relative w-full aspect-square mb-2">
-                            <Image src="/font-pop.png" alt="ポップ" fill className="object-contain" />
+                            <Image src="/font-pop.png" alt="ポップ" fill className="object-contain" unoptimized />
                           </div>
                           <span className="text-center">ポップ</span>
                         </Label>
@@ -803,7 +822,7 @@ export default function ProductPage() {
                           className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
                         >
                           <div className="relative w-full aspect-square mb-2">
-                            <Image src="/font-mincho.png" alt="明朝体" fill className="object-contain" />
+                            <Image src="/font-mincho.png" alt="明朝体" fill className="object-contain" unoptimized />
                           </div>
                           <span className="text-center">明朝体</span>
                         </Label>
@@ -851,6 +870,7 @@ export default function ProductPage() {
                                       alt={decoration.name}
                                       fill
                                       className="object-contain p-1"
+                                      unoptimized
                                     />
                                   )}
                                 </div>
@@ -1387,6 +1407,7 @@ export default function ProductPage() {
                               alt="ノーマル質感（白）"
                               fill
                               className="object-cover"
+                              unoptimized
                             />
                           </div>
                           <div className="p-2 text-center text-sm">ホワイト</div>
@@ -1398,6 +1419,7 @@ export default function ProductPage() {
                               alt="ノーマル質感（赤）"
                               fill
                               className="object-cover"
+                              unoptimized
                             />
                           </div>
                           <div className="p-2 text-center text-sm">レッド</div>
@@ -1409,6 +1431,7 @@ export default function ProductPage() {
                               alt="ノーマル質感（黒）"
                               fill
                               className="object-cover"
+                              unoptimized
                             />
                           </div>
                           <div className="p-2 text-center text-sm">ブラック</div>
@@ -1429,13 +1452,20 @@ export default function ProductPage() {
                               alt="マット質感（白）"
                               fill
                               className="object-cover"
+                              unoptimized
                             />
                           </div>
                           <div className="p-2 text-center text-sm">ホワイト</div>
                         </div>
                         <div className="border rounded-lg overflow-hidden">
                           <div className="relative aspect-video">
-                            <Image src="/texture/matte-red.png" alt="マット質感（赤）" fill className="object-cover" />
+                            <Image
+                              src="/texture/matte-red.png"
+                              alt="マット質感（赤）"
+                              fill
+                              className="object-cover"
+                              unoptimized
+                            />
                           </div>
                           <div className="p-2 text-center text-sm">レッド</div>
                         </div>
@@ -1446,6 +1476,7 @@ export default function ProductPage() {
                               alt="マット質感（黒）"
                               fill
                               className="object-cover"
+                              unoptimized
                             />
                           </div>
                           <div className="p-2 text-center text-sm">ブラック</div>
@@ -1461,19 +1492,37 @@ export default function ProductPage() {
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="border rounded-lg overflow-hidden">
                           <div className="relative aspect-video">
-                            <Image src="/texture/silk-white.png" alt="シルク質感（白）" fill className="object-cover" />
+                            <Image
+                              src="/texture/silk-white.png"
+                              alt="シルク質感（白）"
+                              fill
+                              className="object-cover"
+                              unoptimized
+                            />
                           </div>
                           <div className="p-2 text-center text-sm">ホワイト</div>
                         </div>
                         <div className="border rounded-lg overflow-hidden">
                           <div className="relative aspect-video">
-                            <Image src="/texture/silk-red.png" alt="シルク質感（赤）" fill className="object-cover" />
+                            <Image
+                              src="/texture/silk-red.png"
+                              alt="シルク質感（赤）"
+                              fill
+                              className="object-cover"
+                              unoptimized
+                            />
                           </div>
                           <div className="p-2 text-center text-sm">レッド</div>
                         </div>
                         <div className="border rounded-lg overflow-hidden">
                           <div className="relative aspect-video">
-                            <Image src="/texture/silk-black.png" alt="シルク質感（黒）" fill className="object-cover" />
+                            <Image
+                              src="/texture/silk-black.png"
+                              alt="シルク質感（黒）"
+                              fill
+                              className="object-cover"
+                              unoptimized
+                            />
                           </div>
                           <div className="p-2 text-center text-sm">ブラック</div>
                         </div>
