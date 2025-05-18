@@ -21,11 +21,7 @@ export async function createCheckoutSession(items: CartItem[], customerEmail: st
           product_data: {
             name: item.name,
             description: customizationDetails,
-            images: [
-              item.image.startsWith("http")
-                ? item.image
-                : `${process.env.NEXT_PUBLIC_BASE_URL || ""}${item.image.startsWith("/") ? item.image : `/${item.image}`}`,
-            ],
+            images: [item.image.startsWith("http") ? item.image : `${process.env.NEXT_PUBLIC_BASE_URL}${item.image}`],
           },
           unit_amount: item.price,
         },
