@@ -513,8 +513,8 @@ export default function ProductPage() {
         textColor,
         textColorName,
         text: inputText || "名前",
-        baseTexture, // 追加
-        textTexture, // 追加
+        baseTexture,
+        textTexture,
         ...(template === "fan" && { suffix }),
       },
     }
@@ -522,10 +522,8 @@ export default function ProductPage() {
     addItem(newItem)
     setAddedToCart(true)
 
-    // 3秒後にフィードバックをリセット
-    setTimeout(() => {
-      setAddedToCart(false)
-    }, 3000)
+    // カートページに遷移
+    router.push("/cart")
   }
 
   // カートページに移動する関数

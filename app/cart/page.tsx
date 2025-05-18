@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator"
 import { ShoppingCart, Trash2, ArrowLeft, CreditCard, AlertCircle } from "lucide-react"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { createCheckoutSession } from "@/app/actions/stripe"
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, totalItems, totalPrice } = useCart()
@@ -25,12 +26,21 @@ export default function CartPage() {
   }
 
   // チェックアウトに進む関数
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     setIsCheckingOut(true)
-    // 実際のチェックアウトページに遷移する前に少し待機（UX向上のため）
-    setTimeout(() => {
-      router.push("/checkout")
-    }, 500)
+    try {
+      // Stripe決済セッションを作成して直接リダイレクト
+      const result = await createCheckoutSession(items, "customer@example.com")
+      if (result.url) {
+        window.location.href = result.url
+      } else {
+        throw new Error("決済URLの取得に失敗しました")
+      }
+    } catch (error) {
+      console.error("決済処理エラー:", error)
+      alert("決済処理中にエラーが発生しました。もう一度お試しください。")
+      setIsCheckingOut(false)
+    }
   }
 
   // テンプレート名を日本語に変換する関数

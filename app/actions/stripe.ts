@@ -7,7 +7,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2023-10-16",
 })
 
-export async function createCheckoutSession(items: CartItem[], customerEmail: string) {
+export async function createCheckoutSession(items: CartItem[], customerEmail = "customer@example.com") {
   try {
     // 商品ラインアイテムを作成
     const lineItems = items.map((item) => {
