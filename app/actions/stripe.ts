@@ -7,8 +7,8 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2023-10-16",
 })
 
-// 関数のシグネチャを更新して、デフォルト値のコメントを追加
-export async function createCheckoutSession(items: CartItem[], customerEmail: string) {
+// 関数のシグネチャを更新して、配送情報を受け取るようにする
+export async function createCheckoutSession(items: CartItem[], customerData: any) {
   try {
     // 商品ラインアイテムを作成
     const lineItems = items.map((item) => {
@@ -46,6 +46,20 @@ export async function createCheckoutSession(items: CartItem[], customerEmail: st
       quantity: 1,
     })
 
+    // 配送先住所の情報を作成
+    const shippingDetails = {
+      name: `${customerData.lastName} ${customerData.firstName}`,
+      address: {
+        line1: customerData.address1,
+        line2: customerData.address2 || "",
+        city: customerData.city,
+        state: customerData.prefecture,
+        postal_code: customerData.postalCode,
+        country: "JP",
+      },
+      phone: customerData.phone,
+    }
+
     // チェックアウトセッションを作成
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -53,7 +67,7 @@ export async function createCheckoutSession(items: CartItem[], customerEmail: st
       mode: "payment",
       success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/cart`,
-      customer_email: customerEmail, // チェックアウトページで入力されたメールアドレスを使用
+      customer_email: customerData.email,
       shipping_address_collection: {
         allowed_countries: ["JP"],
       },
@@ -89,6 +103,16 @@ export async function createCheckoutSession(items: CartItem[], customerEmail: st
             customizations: item.customizations,
           })),
         ),
+        customer_name: `${customerData.lastName} ${customerData.firstName}`,
+        shipping_address: JSON.stringify({
+          postal_code: customerData.postalCode,
+          prefecture: customerData.prefecture,
+          city: customerData.city,
+          address1: customerData.address1,
+          address2: customerData.address2 || "",
+        }),
+        phone: customerData.phone,
+        notes: customerData.notes || "",
       },
     })
 

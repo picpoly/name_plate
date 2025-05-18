@@ -44,14 +44,14 @@ export default function CheckoutPage() {
     })
   }
 
-  // 注文を確定する関数
+  // 注文を確定する関数を更新して、フォームデータ全体を渡すように変更
   const handleSubmitOrder = async (e) => {
     e.preventDefault()
     setIsSubmitting(true)
 
     try {
-      // Stripe決済セッションを作成
-      const result = await createCheckoutSession(items, formData.email)
+      // Stripe決済セッションを作成（フォームデータ全体を渡す）
+      const result = await createCheckoutSession(items, formData)
 
       if (result.url) {
         // Stripeのチェックアウトページにリダイレクト
