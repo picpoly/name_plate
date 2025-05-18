@@ -7,7 +7,8 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2023-10-16",
 })
 
-export async function createCheckoutSession(items: CartItem[], customerEmail = "customer@example.com") {
+// 関数のシグネチャを更新して、デフォルト値のコメントを追加
+export async function createCheckoutSession(items: CartItem[], customerEmail: string) {
   try {
     // 商品ラインアイテムを作成
     const lineItems = items.map((item) => {
@@ -48,7 +49,7 @@ export async function createCheckoutSession(items: CartItem[], customerEmail = "
       mode: "payment",
       success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/cart`,
-      customer_email: customerEmail,
+      customer_email: customerEmail, // チェックアウトページで入力されたメールアドレスを使用
       shipping_address_collection: {
         allowed_countries: ["JP"],
       },
