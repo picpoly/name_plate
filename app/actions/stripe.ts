@@ -46,20 +46,6 @@ export async function createCheckoutSession(items: CartItem[], customerData: any
       quantity: 1,
     })
 
-    // 配送先住所の情報を作成
-    const shippingDetails = {
-      name: `${customerData.lastName} ${customerData.firstName}`,
-      address: {
-        line1: customerData.address1,
-        line2: customerData.address2 || "",
-        city: customerData.city,
-        state: customerData.prefecture,
-        postal_code: customerData.postalCode,
-        country: "JP",
-      },
-      phone: customerData.phone,
-    }
-
     // チェックアウトセッションを作成
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],

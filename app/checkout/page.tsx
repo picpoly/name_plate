@@ -20,6 +20,7 @@ export default function CheckoutPage() {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [orderComplete, setOrderComplete] = useState(false)
+  const [errorMessage, setErrorMessage] = useState("")
 
   // フォームの状態
   const [formData, setFormData] = useState({
@@ -48,20 +49,27 @@ export default function CheckoutPage() {
   const handleSubmitOrder = async (e) => {
     e.preventDefault()
     setIsSubmitting(true)
+    setErrorMessage("")
 
     try {
+      console.log("注文処理を開始します...")
+
       // Stripe決済セッションを作成（フォームデータ全体を渡す）
       const result = await createCheckoutSession(items, formData)
 
-      if (result.url) {
+      console.log("決済セッション作成結果:", result)
+
+      if (result && result.url) {
+        console.log("Stripeページにリダイレクトします:", result.url)
         // Stripeのチェックアウトページにリダイレクト
         window.location.href = result.url
       } else {
+        console.error("決済URLが取得できませんでした")
         throw new Error("決済URLの取得に失敗しました")
       }
     } catch (error) {
       console.error("決済処理エラー:", error)
-      alert("決済処理中にエラーが発生しました。もう一度お試しください。")
+      setErrorMessage("決済処理中にエラーが発生しました。もう一度お試しください。")
       setIsSubmitting(false)
     }
   }
@@ -230,6 +238,10 @@ export default function CheckoutPage() {
                 className="min-h-[100px]"
               />
             </div>
+
+            {errorMessage && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">{errorMessage}</div>
+            )}
 
             <div className="flex justify-between items-center">
               <Link href="/cart">
