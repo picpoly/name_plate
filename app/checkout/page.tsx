@@ -62,10 +62,13 @@ export default function CheckoutPage() {
       console.log(
         "[Checkout Page] Calling createCheckoutSession with items:",
         JSON.stringify(items.map((i) => ({ id: i.id, name: i.name }))),
-        "and email:",
+        "email:",
         formData.email,
+        "and formData:", // formData をログに追加
+        JSON.stringify(formData),
       )
-      const result = await createCheckoutSession(items, formData.email)
+      // createCheckoutSession に formData を渡す
+      const result = await createCheckoutSession(items, formData.email, formData)
       console.log("[Checkout Page] Result from createCheckoutSession:", result)
 
       if (result && result.url) {

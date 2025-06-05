@@ -68,9 +68,13 @@ function formatCustomizationForDescription(customizations: CartItem["customizati
   return description || "カスタムメイド商品"
 }
 
-export async function createCheckoutSession(items: CartItem[], customerEmail: string) {
-  console.log("[Stripe Action] createCheckoutSession_v4 called (with detailed description)")
-  console.log("[Stripe Action] STRIPE_SECRET_KEY is set:", !!process.env.STRIPE_SECRET_KEY)
+// createCheckoutSession 関数のシグネチャを変更して formData を受け取る
+export async function createCheckoutSession(
+  items: CartItem[],
+  customerEmail: string,
+  formData: Record<string, string>,
+) {
+  console.log("[Stripe Action] createCheckoutSession_v5 called (with formData for metadata)")
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_BASE_URL
   console.log("[Stripe Action] Resolved App URL:", appUrl)
 
@@ -86,6 +90,16 @@ export async function createCheckoutSession(items: CartItem[], customerEmail: st
     console.warn("[Stripe Action] Warning: Attempted to checkout with an empty cart.")
     return { error: "カートが空です。商品を追加してください。" }
   }
+
+  // formData から metadata に含める情報を準備
+  const shippingInfoForMetadata = {
+    name: `${formData.lastName || ""} ${formData.firstName || ""}`.trim(),
+    postal_code: formData.postalCode || "",
+    address:
+      `${formData.prefecture || ""}${formData.city || ""}${formData.address1 || ""}${formData.address2 ? ` ${formData.address2}` : ""}`.trim(),
+    phone: formData.phone || "",
+  }
+  const customerNotes = formData.notes ? formData.notes.substring(0, 490) : "" // 500文字制限を考慮
 
   try {
     const lineItems = items.map((item) => {
@@ -132,6 +146,7 @@ export async function createCheckoutSession(items: CartItem[], customerEmail: st
       JSON.stringify(lineItems, null, 2),
     )
 
+    // stripe.checkout.sessions.create の metadata を更新
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: lineItems,
@@ -143,9 +158,17 @@ export async function createCheckoutSession(items: CartItem[], customerEmail: st
         allowed_countries: ["JP"],
       },
       metadata: {
+        // metadata を拡張
         order_items_summary: JSON.stringify(
           items.map((item) => ({ id: item.id, name: item.name, quantity: item.quantity })),
         ),
+        // フォームからのお届け先情報を追加 (Stripeが収集するものとは別に参考情報として)
+        customer_name_form: shippingInfoForMetadata.name,
+        customer_postal_code_form: shippingInfoForMetadata.postal_code,
+        customer_address_form: shippingInfoForMetadata.address,
+        customer_phone_form: shippingInfoForMetadata.phone,
+        // 備考欄の内容を追加
+        customer_notes: customerNotes,
       },
     })
 
