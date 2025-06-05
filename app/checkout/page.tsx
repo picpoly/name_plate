@@ -47,21 +47,29 @@ export default function CheckoutPage() {
   // 注文を確定する関数
   const handleSubmitOrder = async (e) => {
     e.preventDefault()
+    console.log("handleSubmitOrder called") // Log: 関数呼び出し確認
     setIsSubmitting(true)
+    console.log("Items to checkout:", items) // Log: カートアイテム確認
+    console.log("Customer email:", formData.email) // Log: メールアドレス確認
 
     try {
       // Stripe決済セッションを作成（メールアドレスのみ渡す）
       const result = await createCheckoutSession(items, formData.email)
+      console.log("Stripe session result:", result) // Log: Stripeアクションの結果確認
 
-      if (result.url) {
-        // Stripeのチェックアウトページにリダイレクト
+      if (result && result.url) {
+        console.log("Redirecting to Stripe URL:", result.url) // Log: リダイレクトURL確認
         window.location.href = result.url
       } else {
-        throw new Error("決済URLの取得に失敗しました")
+        // エラーメッセージを具体的に表示
+        const errorMessage = result && result.error ? result.error : "決済URLの取得に失敗しました。"
+        console.error("Failed to get Stripe session URL. Result:", result)
+        alert(`${errorMessage} 問題が解決しない場合は、管理者にお問い合わせください。`)
+        setIsSubmitting(false) // isSubmittingを解除
       }
     } catch (error) {
-      console.error("決済処理エラー:", error)
-      alert("決済処理中にエラーが発生しました。もう一度お試しください。")
+      console.error("決済処理エラー (catch block):", error)
+      alert("決済処理中に予期せぬエラーが発生しました。もう一度お試しください。")
       setIsSubmitting(false)
     }
   }
