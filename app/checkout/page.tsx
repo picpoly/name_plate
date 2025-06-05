@@ -17,12 +17,9 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { createCheckoutSession } from "@/app/actions/stripe"
 
 export default function CheckoutPage() {
-  const { items, totalItems, totalPrice, clearCart } = useCart()
+  const { items, totalItems, totalPrice, clearCart } = useCart() // clearCart は success ページで呼ぶのでここでは不要かも
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  // orderComplete ステートは success ページで管理するため、ここでは不要かもしれません
-  // const [orderComplete, setOrderComplete] = useState(false)
-
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -45,7 +42,6 @@ export default function CheckoutPage() {
   }
 
   const handleSubmitOrder = async (e: FormEvent<HTMLFormElement>) => {
-    // イベントの型を修正
     e.preventDefault()
     console.log("Checkout form submitted. Current form data:", formData)
     setIsSubmitting(true)
@@ -53,11 +49,9 @@ export default function CheckoutPage() {
     if (items.length === 0) {
       alert("カートに商品がありません。商品ページから商品を追加してください。")
       setIsSubmitting(false)
-      router.push("/product") // 商品ページへ誘導
+      router.push("/product")
       return
     }
-
-    // 簡単なメールアドレスバリデーション
     if (!formData.email || !formData.email.includes("@")) {
       alert("有効なメールアドレスを入力してください。")
       setIsSubmitting(false)
@@ -76,33 +70,26 @@ export default function CheckoutPage() {
 
       if (result && result.url) {
         console.log("[Checkout Page] Successfully received redirect URL. Redirecting to Stripe:", result.url)
-        // Stripeへのリダイレクトが開始されるので、isSubmitting は解除しなくても良い
-        // clearCart() は成功ページ (success/page.tsx) で行うべきです
         window.location.href = result.url
       } else if (result && result.error) {
         console.error("[Checkout Page] Error from createCheckoutSession:", result.error)
         alert(
           `決済セッションの開始に失敗しました: ${result.error}\n\nお手数ですが、入力内容をご確認いただくか、時間をおいて再度お試しください。問題が解決しない場合は、管理者にお問い合わせください。`,
         )
-        setIsSubmitting(false) // エラー時はボタンを再度有効化
+        setIsSubmitting(false)
       } else {
         console.error("[Checkout Page] Unknown error: createCheckoutSession returned an unexpected result:", result)
         alert("決済セッションの開始に失敗しました。予期せぬエラーが発生しました。")
-        setIsSubmitting(false) // エラー時はボタンを再度有効化
+        setIsSubmitting(false)
       }
     } catch (error) {
       console.error("[Checkout Page] Critical error during handleSubmitOrder:", error)
       alert("決済処理の呼び出し中に重大なエラーが発生しました。ページをリロードして再度お試しください。")
-      setIsSubmitting(false) // エラー時はボタンを再度有効化
+      setIsSubmitting(false)
     }
   }
 
-  // orderComplete時の表示は success/page.tsx に移譲するため、この部分は削除またはコメントアウト
-  /*
-  if (orderComplete) {
-    // ... (省略) ...
-  }
-  */
+  // カートが空の場合の表示はそのまま
 
   if (items.length === 0 && !isSubmitting) {
     // isSubmitting中は表示しない
@@ -128,8 +115,8 @@ export default function CheckoutPage() {
   return (
     <div className="container mx-auto px-4 py-12 max-w-5xl">
       <h1 className="text-2xl font-bold mb-8">チェックアウト</h1>
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* 注文フォーム */}
         <div className="lg:col-span-2">
           <form onSubmit={handleSubmitOrder}>
             <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
@@ -245,16 +232,16 @@ export default function CheckoutPage() {
           </form>
         </div>
 
+        {/* 注文サマリー */}
         <div className="lg:col-span-1">
           <div className="bg-white rounded-lg shadow-sm p-6 sticky top-4">
             <h2 className="text-lg font-semibold mb-4">注文内容</h2>
+            {/* ... (商品一覧アコーディオンはそのまま) ... */}
             <Accordion type="single" collapsible defaultValue="items">
               <AccordionItem value="items">
                 <AccordionTrigger>商品一覧 ({totalItems}点)</AccordionTrigger>
                 <AccordionContent>
                   <div className="space-y-4 mt-2 max-h-60 overflow-y-auto">
-                    {" "}
-                    {/* スクロール可能に */}
                     {items.map((item) => (
                       <div key={item.id} className="flex gap-3">
                         <div className="relative w-16 h-16 rounded-md overflow-hidden bg-gray-100 flex-shrink-0">
@@ -289,14 +276,20 @@ export default function CheckoutPage() {
                 <span>小計</span>
                 <span>¥{totalPrice.toLocaleString()}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between items-center">
                 <span>送料</span>
-                <span>¥185</span>
+                <div className="text-right">
+                  <p className="text-xs text-green-600 font-semibold">オンライン販売開始記念！</p>
+                  <p className="text-xs text-green-600 font-semibold mb-1">送料無料キャンペーン実施中</p>
+                  <span className="line-through text-gray-500">¥185</span>
+                  <span className="font-semibold ml-2">¥0</span>
+                </div>
               </div>
               <Separator className="my-2" />
               <div className="flex justify-between font-bold">
                 <span>合計</span>
-                <span>¥{(totalPrice + 185).toLocaleString()}</span>
+                {/* 送料を0円として計算 */}
+                <span>¥{(totalPrice + 0).toLocaleString()}</span>
               </div>
               <div className="text-xs text-gray-500 text-right">（税込）</div>
             </div>
@@ -307,9 +300,7 @@ export default function CheckoutPage() {
   )
 }
 
-// getSuffixName 関数は checkout/page.tsx では直接使用されていないため、
-// 必要であれば CartPage のように定義するか、共通ユーティリティに移すことを検討してください。
-// 今回の修正では直接影響しないため、一旦そのままにします。
+// getSuffixName 関数は変更なし
 function getSuffixName(suffix: string) {
   switch (suffix) {
     case "chan":

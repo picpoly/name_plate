@@ -91,20 +91,23 @@ export async function createCheckoutSession(items: CartItem[], customerEmail: st
       }
     })
 
-    // 送料のラインアイテム
+    // 送料のラインアイテムを修正
     lineItems.push({
       price_data: {
         currency: "jpy",
         product_data: {
           name: "送料",
-          description: "国内配送料",
+          description: "オンライン販売開始記念！送料無料キャンペーン実施中", // 説明を更新
         },
-        unit_amount: 185, // 送料
+        unit_amount: 0, // 送料を0円に設定
       },
       quantity: 1,
     })
 
-    console.log("[Stripe Action] Final line_items for Stripe:", JSON.stringify(lineItems, null, 2))
+    console.log(
+      "[Stripe Action] Final line_items for Stripe (with campaign shipping):",
+      JSON.stringify(lineItems, null, 2),
+    )
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],

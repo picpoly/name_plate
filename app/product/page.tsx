@@ -699,8 +699,11 @@ export default function ProductPage() {
             </div>
 
             <p className="text-2xl font-bold mb-2">¥1,300〜</p>
-            <p className="text-sm text-muted-foreground mb-4">送料：全国一律185円</p>
-            <p className="text-sm text-muted-foreground mb-2">※制作内容によって金額が変動します。</p>
+            {/* 送料の記載を修正 */}
+            <p className="text-sm text-green-600 font-semibold mb-2">
+              オンライン販売開始記念！送料無料キャンペーン実施中！
+            </p>
+            <p className="text-sm text-muted-foreground mb-4">※制作内容によって金額が変動します。</p>
             <p className="text-sm text-muted-foreground mb-6">※この商品は注文個数で金額変動しません</p>
 
             <div className="space-y-6 mb-6">
@@ -1374,7 +1377,11 @@ export default function ProductPage() {
                   <div className="space-y-4">
                     <div>
                       <h3 className="font-medium mb-2">送料</h3>
-                      <p>全国一律185円（税込）</p>
+                      {/* 送料の記載を修正 */}
+                      <p className="text-green-600 font-semibold">
+                        オンライン販売開始記念！送料無料キャンペーン実施中！
+                      </p>
+                      <p className="text-sm text-gray-500 mt-1">通常送料: 全国一律185円（税込）</p>
                     </div>
                     <div>
                       <h3 className="font-medium mb-2">配送期間</h3>

@@ -233,14 +233,20 @@ export default function CartPage() {
                 <span>小計</span>
                 <span>¥{totalPrice.toLocaleString()}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between items-center">
                 <span>送料</span>
-                <span>¥185</span>
+                <div className="text-right">
+                  <p className="text-xs text-green-600 font-semibold">オンライン販売開始記念！</p>
+                  <p className="text-xs text-green-600 font-semibold mb-1">送料無料キャンペーン実施中</p>
+                  <span className="line-through text-gray-500">¥185</span>
+                  <span className="font-semibold ml-2">¥0</span>
+                </div>
               </div>
               <Separator className="my-2" />
               <div className="flex justify-between font-bold">
                 <span>合計</span>
-                <span>¥{(totalPrice + 185).toLocaleString()}</span>
+                {/* 送料を0円として計算 */}
+                <span>¥{(totalPrice + 0).toLocaleString()}</span>
               </div>
               <div className="text-xs text-gray-500 text-right">（税込）</div>
             </div>
