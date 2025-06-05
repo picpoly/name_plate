@@ -433,72 +433,72 @@ export default function ProductPage() {
     if (template === "fan") {
       // 推し活風テンプレート
       svgContent = `
-        <svg width="100%" height="100%" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
-              <feDropShadow dx="2" dy="2" stdDeviation="2" floodOpacity="0.3" />
-            </filter>
-          </defs>
-          <path d="M50,150 C50,80 150,30 200,30 C250,30 350,80 350,150 C350,220 300,270 200,270 C100,270 50,220 50,150 Z" 
-                fill="${baseColor}" stroke="#00000020" strokeWidth="1" filter="url(#shadow)" />
-          <text x="200" y="150" textAnchor="middle" dominantBaseline="middle" 
-                fontFamily="${fontFamily}" fontWeight="${fontWeight}" fontSize="36" 
-                letterSpacing="${letterSpacing}" fill="${textColor}">
-            ${fullText}
-          </text>
-          ${
-            selectedDecoration !== "none"
-              ? `<image x="260" y="90" width="40" height="40" href="${getDecorationImage()}" />`
-              : ""
-          }
-        </svg>
-      `
+      <svg width="100%" height="100%" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+            <feDropShadow dx="2" dy="2" stdDeviation="2" floodOpacity="0.3" />
+          </filter>
+        </defs>
+        <path d="M50,150 C50,80 150,30 200,30 C250,30 350,80 350,150 C350,220 300,270 200,270 C100,270 50,220 50,150 Z" 
+              fill="${baseColor}" stroke="#00000020" strokeWidth="1" filter="url(#shadow)" />
+        <text x="200" y="150" textAnchor="middle" dominantBaseline="middle" 
+              fontFamily="${fontFamily}" fontWeight="${fontWeight}" fontSize="36" 
+              letterSpacing="${letterSpacing}" fill="${textColor}">
+          ${fullText}
+        </text>
+        ${
+          selectedDecoration !== "none"
+            ? `<image x="260" y="90" width="40" height="40" href="${getDecorationImage()}" />`
+            : ""
+        }
+      </svg>
+    `
     } else if (template === "vertical") {
       // 縦書きテンプレート
       svgContent = `
-        <svg width="100%" height="100%" viewBox="0 0 200 400" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
-              <feDropShadow dx="2" dy="2" stdDeviation="2" floodOpacity="0.3" />
-            </filter>
-          </defs>
-          <rect x="50" y="50" width="100" height="300" rx="10" ry="10" 
-                fill="${baseColor}" stroke="#00000020" strokeWidth="1" filter="url(#shadow)" />
-          <text x="100" y="200" textAnchor="middle" dominantBaseline="middle" 
-                fontFamily="${fontFamily}" fontWeight="${fontWeight}" fontSize="36" 
-                writingMode="tb" letterSpacing="${letterSpacing}" fill="${textColor}">
-            ${fullText}
-          </text>
-          ${
-            selectedDecoration !== "none"
-              ? `<image x="80" y="280" width="40" height="40" href="${getDecorationImage()}" />`
-              : ""
-          }
-        </svg>
-      `
+      <svg width="100%" height="100%" viewBox="0 0 200 400" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+            <feDropShadow dx="2" dy="2" stdDeviation="2" floodOpacity="0.3" />
+          </filter>
+        </defs>
+        <rect x="50" y="50" width="100" height="300" rx="10" ry="10" 
+              fill="${baseColor}" stroke="#00000020" strokeWidth="1" filter="url(#shadow)" />
+        <text x="100" y="200" textAnchor="middle" dominantBaseline="middle" 
+              fontFamily="${fontFamily}" fontWeight="${fontWeight}" fontSize="36" 
+              writingMode="tb" letterSpacing="${letterSpacing}" fill="${textColor}">
+          ${fullText}
+        </text>
+        ${
+          selectedDecoration !== "none"
+            ? `<image x="80" y="280" width="40" height="40" href="${getDecorationImage()}" />`
+            : ""
+        }
+      </svg>
+    `
     } else {
       // 横書きテンプレート
       svgContent = `
-        <svg width="100%" height="100%" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
-              <feDropShadow dx="2" dy="2" stdDeviation="2" floodOpacity="0.3" />
-            </filter>
-          </defs>
-          <rect x="50" y="50" width="300" height="100" rx="10" ry="10" 
-                fill="${baseColor}" stroke="#00000020" strokeWidth="1" filter="url(#shadow)" />
-          <text x="200" y="100" textAnchor="middle" dominantBaseline="middle" 
-                fontFamily="${fontFamily}" fontWeight="${fontWeight}" fontSize="36" 
-                letterSpacing="${letterSpacing}" fill="${textColor}">
-            ${fullText}
-          </text>
-          ${
-            selectedDecoration !== "none"
-              ? `<image x="280" y="80" width="40" height="40" href="${getDecorationImage()}" />`
-              : ""
-          }
-        </svg>
-      `
+      <svg width="100%" height="100%" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+            <feDropShadow dx="2" dy="2" stdDeviation="2" floodOpacity="0.3" />
+          </filter>
+        </defs>
+        <rect x="50" y="50" width="300" height="100" rx="10" ry="10" 
+              fill="${baseColor}" stroke="#00000020" strokeWidth="1" filter="url(#shadow)" />
+        <text x="200" y="100" textAnchor="middle" dominantBaseline="middle" 
+              fontFamily="${fontFamily}" fontWeight="${fontWeight}" fontSize="36" 
+              letterSpacing="${letterSpacing}" fill="${textColor}">
+          ${fullText}
+        </text>
+        ${
+          selectedDecoration !== "none"
+            ? `<image x="280" y="80" width="40" height="40" href="${getDecorationImage()}" />`
+            : ""
+        }
+      </svg>
+    `
     }
 
     // SVGをDOMに追加
@@ -935,15 +935,15 @@ export default function ProductPage() {
                         <p>マット：落ち着いた質感の艶消し仕上げ</p>
                         <p>シルク：上品な光沢感のある特殊仕上げ</p>
                       </InfoPopover>
-                      <Button
-                        variant="link"
-                        size="sm"
-                        className="ml-2 text-blue-500 flex items-center"
-                        onClick={scrollToMaterialTab}
+                      <a
+                        href="https://colorcode.picpoly.com/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="ml-2 text-blue-500 flex items-center text-sm"
                       >
-                        <span className="text-xs">質感について</span>
+                        <span className="text-xs">カラーと質感について</span>
                         <ExternalLink className="h-3 w-3 ml-1" />
-                      </Button>
+                      </a>
                     </div>
                     <RadioGroup
                       defaultValue="normal"
@@ -1010,15 +1010,15 @@ export default function ProductPage() {
                         <p>マット：落ち着いた質感の艶消し仕上げ</p>
                         <p>シルク：上品な光沢感のある特殊仕上げ</p>
                       </InfoPopover>
-                      <Button
-                        variant="link"
-                        size="sm"
-                        className="ml-2 text-blue-500 flex items-center"
-                        onClick={scrollToMaterialTab}
+                      <a
+                        href="https://colorcode.picpoly.com/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="ml-2 text-blue-500 flex items-center text-sm"
                       >
-                        <span className="text-xs">質感について</span>
+                        <span className="text-xs">カラーと質感について</span>
                         <ExternalLink className="h-3 w-3 ml-1" />
-                      </Button>
+                      </a>
                     </div>
                     <RadioGroup
                       defaultValue="normal"
