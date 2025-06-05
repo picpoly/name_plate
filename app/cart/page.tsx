@@ -3,19 +3,24 @@
 import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
+// useRouter はリダイレクトに使用するため残します
 import { useRouter } from "next/navigation"
 import { useCart } from "@/context/cart-context"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label" // Label をインポート
 import { Separator } from "@/components/ui/separator"
 import { ShoppingCart, Trash2, ArrowLeft, CreditCard, AlertCircle } from "lucide-react"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { createCheckoutSession } from "@/app/actions/stripe" // Stripeアクションをインポート
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, totalItems, totalPrice } = useCart()
-  const router = useRouter()
+  const router = useRouter() // router を使用
   const [isCheckingOut, setIsCheckingOut] = useState(false)
+  const [customerEmail, setCustomerEmail] = useState("") // メールアドレス用のstate
+  const [checkoutError, setCheckoutError] = useState<string | null>(null) // エラーメッセージ用state
 
   // 商品の数量を変更する関数
   const handleQuantityChange = (id: string, newQuantity: number) => {
@@ -24,11 +29,38 @@ export default function CartPage() {
     updateQuantity(id, newQuantity)
   }
 
-  // チェックアウトに進む関数
-  const handleCheckout = () => {
+  // チェックアウトに進む関数をStripe直接呼び出しに変更
+  const handleCheckout = async () => {
+    if (!customerEmail || !customerEmail.includes("@")) {
+      setCheckoutError("有効なメールアドレスを入力してください。")
+      return
+    }
+    if (items.length === 0) {
+      setCheckoutError("カートに商品がありません。")
+      return
+    }
+
     setIsCheckingOut(true)
-    // チェックアウトページに遷移
-    router.push("/checkout")
+    setCheckoutError(null)
+
+    try {
+      // createCheckoutSession に渡す formData はここでは空または最小限
+      // 今回は formData を渡さない（アクション側でオプショナルとして扱われる想定）
+      const result = await createCheckoutSession(items, customerEmail)
+
+      if (result && result.url) {
+        window.location.href = result.url // Stripeの決済ページにリダイレクト
+      } else if (result && result.error) {
+        setCheckoutError(`決済セッションの開始に失敗しました: ${result.error}`)
+      } else {
+        setCheckoutError("決済セッションの開始に失敗しました。予期せぬエラーが発生しました。")
+      }
+    } catch (error) {
+      console.error("Checkout error:", error)
+      setCheckoutError("決済処理の呼び出し中にエラーが発生しました。")
+    } finally {
+      setIsCheckingOut(false)
+    }
   }
 
   // テンプレート名を日本語に変換する関数
@@ -251,6 +283,30 @@ export default function CartPage() {
               <div className="text-xs text-gray-500 text-right">（税込）</div>
             </div>
 
+            {/* メールアドレス入力フィールド */}
+            <div className="mb-4">
+              <Label htmlFor="customerEmail" className="text-sm font-medium">
+                メールアドレス (必須)
+              </Label>
+              <Input
+                id="customerEmail"
+                type="email"
+                value={customerEmail}
+                onChange={(e) => setCustomerEmail(e.target.value)}
+                placeholder="email@example.com"
+                required
+                className="mt-1"
+              />
+            </div>
+
+            {checkoutError && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>エラー</AlertTitle>
+                <AlertDescription>{checkoutError}</AlertDescription>
+              </Alert>
+            )}
+
             <Alert className="mb-4">
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>お届け日数</AlertTitle>
@@ -263,7 +319,7 @@ export default function CartPage() {
               ) : (
                 <>
                   <CreditCard className="mr-2 h-5 w-5" />
-                  注文手続きへ進む
+                  Stripeで支払う
                 </>
               )}
             </Button>
