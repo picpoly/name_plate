@@ -933,7 +933,7 @@ export default function ProductPage() {
                   {/* ベースカラー質感 */}
                   <div className="mb-6">
                     <div className="flex items-center mb-2">
-                      <h3 className="font-medium">ベースカラー質感</h3>
+                      <h3 className="font-medium">プレート本体の質感</h3>
                       <InfoPopover name="baseTexture" title="ベースカラー質感">
                         <p>ノーマル：標準的な光沢のある仕上がり</p>
                         <p>マット：落ち着いた質感の艶消し仕上げ</p>
@@ -948,6 +948,19 @@ export default function ProductPage() {
                         <span className="text-xs">カラーと質感について</span>
                         <ExternalLink className="h-3 w-3 ml-1" />
                       </a>
+                    </div>
+                    {/* ベースカラー質感の説明画像 */}
+                    <div className="my-3 p-2 border rounded-md bg-slate-50">
+                      <p className="text-sm text-center text-slate-600 mb-2">プレート本体の質感と色を選びます。</p>
+                      <div className="relative w-full aspect-[2/1] mb-2">
+                        <Image
+                          src="/base-selection-guide.png"
+                          alt="ベースカラー選択ガイド"
+                          fill
+                          className="object-contain rounded"
+                          unoptimized
+                        />
+                      </div>
                     </div>
                     <RadioGroup
                       defaultValue="normal"
@@ -975,7 +988,7 @@ export default function ProductPage() {
                   {/* ベースカラー */}
                   <div className="mb-6">
                     <div className="flex items-center mb-2">
-                      <h3 className="font-medium">ベースカラー</h3>
+                      <h3 className="font-medium">プレート本体の色</h3>
                       <InfoPopover name="baseColor" title="ベースカラー">
                         <p>プレートの背景色を選択</p>
                         <p>選択した質感によって利用できる色が変わります</p>
@@ -1008,7 +1021,7 @@ export default function ProductPage() {
                   {/* テキストカラー質感 */}
                   <div className="mb-6">
                     <div className="flex items-center mb-2">
-                      <h3 className="font-medium">テキストカラー質感</h3>
+                      <h3 className="font-medium">文字部分の質感</h3>
                       <InfoPopover name="textTexture" title="テキストカラー質感">
                         <p>ノーマル：標準的な光沢のある仕上がり</p>
                         <p>マット：落ち着いた質感の艶消し仕上げ</p>
@@ -1023,6 +1036,19 @@ export default function ProductPage() {
                         <span className="text-xs">カラーと質感について</span>
                         <ExternalLink className="h-3 w-3 ml-1" />
                       </a>
+                    </div>
+                    {/* テキストカラー質感の説明画像 */}
+                    <div className="my-3 p-2 border rounded-md bg-slate-50">
+                      <p className="text-sm text-center text-slate-600 mb-2">文字部分の質感と色を選びます。</p>
+                      <div className="relative w-full aspect-[2/1] mb-2">
+                        <Image
+                          src="/text-selection-guide.png"
+                          alt="テキストカラー選択ガイド"
+                          fill
+                          className="object-contain rounded"
+                          unoptimized
+                        />
+                      </div>
                     </div>
                     <RadioGroup
                       defaultValue="normal"
@@ -1050,7 +1076,7 @@ export default function ProductPage() {
                   {/* テキストカラー */}
                   <div>
                     <div className="flex items-center mb-2">
-                      <h3 className="font-medium">テキストカラー</h3>
+                      <h3 className="font-medium">文字部分の色</h3>
                       <InfoPopover name="textColor" title="テキストカラー">
                         <p>文字の色を選択</p>
                         <p>選択した質感によって利用できる色が変わります</p>
